@@ -24,5 +24,5 @@ Minimal functional programming language like lambda calculus written in java wit
 
 # Libraries requirements
 
-ANTLR4 for java: https://www.antlr.org/download.html (for jlambda lexer and parser)
-Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
+- ANTLR4 for java: https://www.antlr.org/download.html (for jlambda lexer and parser)
+- Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)

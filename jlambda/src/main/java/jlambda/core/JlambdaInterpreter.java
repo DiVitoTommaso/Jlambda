@@ -9,7 +9,10 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class JlambdaInterpreter {
 
-    public static abstract class Expression { }
+    private static final HashMap<String, JlambdaInterpreter.Expression> env = new HashMap<>();
+
+    public static abstract class Expression {
+    }
 
     public static class JLString extends Expression {
         private final String v;
@@ -178,7 +181,7 @@ public class JlambdaInterpreter {
         return res;
     }
 
-    public static String let(JlambdaParser.LetContext ctx, HashMap<String, Expression> env) {
+    private static String let(JlambdaParser.LetContext ctx, HashMap<String, Expression> env) {
         if (ctx.VARIABLE() != null) {
             Expression res = expr(ctx.expr(), env);
             env.put(ctx.VARIABLE().toString(), res);
@@ -190,13 +193,18 @@ public class JlambdaInterpreter {
         }
     }
 
-    public static void stmt(JlambdaParser.StmtContext ctx, HashMap<String, Expression> env) {
+    public static void stmt(JlambdaParser.StmtContext ctx) {
         for (ParseTree tree : ctx.children) {
             if (tree instanceof JlambdaParser.LetContext tmp)
                 System.out.println("val " + let(tmp, env));
             if (tree instanceof JlambdaParser.ExprContext tmp)
                 System.out.println("val - => " + expr(tmp, env));
         }
+    }
+
+    public static void register(String var, Method m) {
+        env.put(var, new JlambdaInterpreter.JavaFunction(m));
+        System.out.println("val " + var + " => " + m);
     }
 
 }

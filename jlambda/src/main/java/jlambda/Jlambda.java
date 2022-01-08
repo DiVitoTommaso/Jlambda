@@ -8,22 +8,18 @@ import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Scanner;
 
 public class Jlambda {
 
-    private static final HashMap<String, JlambdaInterpreter.Expression> env = new HashMap<>();
-
     public static synchronized void register(String var, Method m) {
-        env.put(var, new JlambdaInterpreter.JavaFunction(m));
-        System.out.println("val " + var + " => " + m);
+        JlambdaInterpreter.register(var, m);
     }
 
     public static synchronized void eval(String code) {
         JlambdaLexer lexer = new JlambdaLexer(CharStreams.fromString(code));
         JlambdaParser parser = new JlambdaParser(new CommonTokenStream(lexer));
-        JlambdaInterpreter.stmt(parser.stmt(), env);
+        JlambdaInterpreter.stmt(parser.stmt());
     }
 
     public static void main(String[] args) {

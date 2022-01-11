@@ -12,11 +12,11 @@ import java.util.Scanner;
 
 public class Jlambda {
 
-    public static synchronized void register(String var, Method m) {
+    public static void register(String var, Method m) {
         JlambdaInterpreter.register(var, m);
     }
 
-    public static synchronized void eval(String code) {
+    public static void eval(String code) {
         JlambdaLexer lexer = new JlambdaLexer(CharStreams.fromString(code));
         JlambdaParser parser = new JlambdaParser(new CommonTokenStream(lexer));
         JlambdaInterpreter.stmt(parser.stmt());

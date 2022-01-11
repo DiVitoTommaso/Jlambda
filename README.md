@@ -20,8 +20,9 @@ Minimal functional programming language like lambda calculus written in java wit
 4) Don't edit eval method, register method or env field (hashmap) or interpreter will break
 5) You can call the interpreter to register native java methods or evaluate jlambda code from external project using the methods of Jlambda class (Jlambda.eval(), Jlambda.register())
 6) JLBuiltin class contains some useful native method that can be registered to the interpreter 
-7) Evaluation will extend global enviroment and it won't reset at the end of the eval method call
-8) Only one thread at time can access the interpreter 
+7) Evaluation will extend global enviroment associated to the thread who invoked the expression evaluation and it won't reset at the end of the eval method call.
+8) If an error occur the enviroment created before the error will remain and an error will be raised
+9) Each thread has his own enviroment and at the first call to the interpreter an empty enviroment will be created
 
 # Libraries requirements
 

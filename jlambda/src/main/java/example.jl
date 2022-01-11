@@ -1,6 +1,0 @@
-let true = fun t -> fun f -> (t)
-let false = fun t -> fun f -> (f)
-let if = fun c -> fun then -> fun else -> (c(then)(else))
-let Y = fun f -> (fun x -> (f (x(x)))(fun x -> (f (x(x)))))
-let + = fun x -> fun y -> (x(y))
-let * = fun x -> fun y -> (Y(x)(y))

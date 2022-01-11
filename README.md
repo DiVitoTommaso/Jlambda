@@ -28,3 +28,10 @@ Minimal functional programming language like lambda calculus written in java wit
 
 - ANTLR4 for java: https://www.antlr.org/download.html (for jlambda lexer and parser)
 - Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
+
+# Expression example
+```
+let res = fun x -> (x x)
+let v = 5
+let res = let tmp = 5 in res(tmp)
+```

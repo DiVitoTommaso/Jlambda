@@ -9,7 +9,7 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class JlambdaInterpreter {
 
-    private static final HashMap<String, JlambdaInterpreter.Expression> env = new HashMap<>();
+    private static final HashMap<Thread, HashMap<String, JlambdaInterpreter.Expression>> envs = new HashMap<>();
 
     private static abstract class Expression {
     }
@@ -245,6 +245,9 @@ public class JlambdaInterpreter {
     }
 
     public static void stmt(JlambdaParser.StmtContext ctx) {
+        envs.putIfAbsent(Thread.currentThread(), new HashMap<>());
+        HashMap<String, Expression> env = envs.get(Thread.currentThread());
+
         for (ParseTree tree : ctx.children) {
             if (tree instanceof JlambdaParser.LetContext tmp)
                 System.out.println("val " + let(tmp, env));
@@ -254,6 +257,9 @@ public class JlambdaInterpreter {
     }
 
     public static void register(String var, Method m) {
+        envs.putIfAbsent(Thread.currentThread(), new HashMap<>());
+        HashMap<String, Expression> env = envs.get(Thread.currentThread());
+
         env.put(var, new JlambdaInterpreter.JavaFunction(m));
         System.out.println("val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount()));
     }

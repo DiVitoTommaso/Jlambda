@@ -25,8 +25,9 @@ public class Jlambda {
     public static void main(String[] args) {
         // example usage
         try {
-            register("max", Math.class.getMethod("max", Integer.TYPE, Integer.TYPE));
-            register("==", JLBuiltin.class.getMethod("jlEquals", Object.class, Object.class));
+            register("equal", JLBuiltin.class.getMethod("equal", Object.class, Object.class));
+            register("mul", JLBuiltin.class.getMethod("mul", Number.class, Number.class));
+            register("int", JLBuiltin.class.getMethod("intCast", Number.class));
         } catch (NoSuchMethodException ignored) {
         }
 
@@ -43,6 +44,8 @@ public class Jlambda {
             } catch (Exception e) {
                 System.err.println("FileError: file not found at path: " + args[0]);
                 System.exit(-1);
+            } catch (Error e){
+                System.err.println(e.getMessage());
             }
 
         }

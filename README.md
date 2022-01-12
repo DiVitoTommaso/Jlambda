@@ -4,7 +4,7 @@ Minimal functional programming language like lambda calculus written in java wit
 2) Partial functions
 3) Static scoping
 4) Shadowing support (for let and let-in)
-5) Possibility to load native java function and possibility to treat them as normal function of this language (they partial application support, but you can work only with primitives of the language (int, float, string, double, boolean or their super classes) as parameters and return type must be instance of (int, float, string, double)) or function will raise an error
+5) Possibility to load native java function and possibility to treat them as normal function of this language (they support partial application, but you can work only with primitives of the language (int, float, string, double, boolean or their super classes) as parameters and return type must be instance of (int, float, string, double, boolean)) or function will raise an error
 6) Let to assign a name to an expression, function or result of a function application
 7) Let-in to assign a name visible only in the expression which follows 'in' locally (as ocaml)
 8) No static analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, but you get errors for unbound names (variables) only during function application not during declaration. (functions with free variable will compile, but they'll fail at invocation time)

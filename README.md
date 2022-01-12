@@ -31,7 +31,7 @@ Minimal functional programming language like lambda calculus written in java wit
 
 # Expression example
 ```
-let res = fun x -> (+(x)(x)) # comment: assuming + is registered natively #
-let v = 5
-let res = let tmp = 5 in res(tmp)
+let if = fun c -> fun then -> fun else -> (c(then)(else))
+let Ω = fun x -> (x(x)) #  Ω(Ω) infinite application #
+let one = 1 in equal(one)(one) # assuming equal is native registered #
 ```

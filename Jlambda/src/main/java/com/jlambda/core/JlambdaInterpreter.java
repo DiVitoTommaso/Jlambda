@@ -87,8 +87,12 @@ public class JlambdaInterpreter {
             if (o instanceof Boolean tmp)
                 return new JLBool(tmp);
 
-            if (o instanceof Double tmp)
+            if (o instanceof Double tmp) {
+                if (tmp % 1 == 0)
+                    return new JLInt(tmp.intValue());
                 return new JLFloat(tmp);
+            }
+
 
             throw new Error("TypeError: unsupported native type: " + o.getClass().getSimpleName());
 
@@ -104,8 +108,12 @@ public class JlambdaInterpreter {
             if (e instanceof JLBool tmp)
                 return tmp.v;
 
-            if (e instanceof JLFloat tmp)
+            if (e instanceof JLFloat tmp) {
+                if (tmp.v % 1 == 0)
+                    return (int) tmp.v;
                 return tmp.v;
+            }
+
 
             throw new Error("TypeError: function cannot be converted to native type");
         }
@@ -189,10 +197,6 @@ public class JlambdaInterpreter {
             if (ctx.BOOL() != null)
                 return new JLFloat(Double.parseDouble(ctx.BOOL().toString()));
 
-            // symbol
-            if (ctx.OPERATOR() != null)
-                return env.get(ctx.OPERATOR().toString());
-
             // string
             if (ctx.STRING() != null)
                 return new JLString(ctx.STRING().toString());
@@ -233,26 +237,26 @@ public class JlambdaInterpreter {
     }
 
     private static String let(JlambdaParser.LetContext ctx, HashMap<String, Expression> env) {
-        if (ctx.VARIABLE() != null) {
-            Expression res = expr(ctx.expr(), env);
-            env.put(ctx.VARIABLE().toString(), res);
-            return ctx.VARIABLE().toString() + " => " + res.toString();
-        } else {
-            Expression res = expr(ctx.expr(), env);
-            env.put(ctx.OPERATOR().toString(), res);
-            return ctx.OPERATOR().toString() + " => " + res.toString();
-        }
+        Expression res = expr(ctx.expr(), env);
+        env.put(ctx.VARIABLE().toString(), res);
+        return ctx.VARIABLE().toString() + " => " + res.toString();
     }
 
     public static void stmt(JlambdaParser.StmtContext ctx) {
         envs.putIfAbsent(Thread.currentThread(), new HashMap<>());
         HashMap<String, Expression> env = envs.get(Thread.currentThread());
 
-        for (ParseTree tree : ctx.children) {
-            if (tree instanceof JlambdaParser.LetContext tmp)
-                System.out.println("val " + let(tmp, env));
-            if (tree instanceof JlambdaParser.ExprContext tmp)
-                System.out.println("val - => " + expr(tmp, env));
+        try {
+            for (ParseTree tree : ctx.children) {
+                if (tree instanceof JlambdaParser.LetContext tmp)
+                    System.out.println("val " + let(tmp, env));
+                if (tree instanceof JlambdaParser.ExprContext tmp)
+                    System.out.println("val - => " + expr(tmp, env));
+            }
+        } catch (StackOverflowError e) {
+            System.err.println("LoopError: infinite function application in expression: " + ctx.getText());
+        } catch (OutOfMemoryError e){
+            System.err.println("MemoryError: memory limit reached in expression: " + ctx.getText());
         }
     }
 

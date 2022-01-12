@@ -1,4 +1,4 @@
-// Generated from C:/Users/Tommaso/Documents/Progetti/Java/jlambda/src/main/java/com/jlambda/core\Jlambda.g4 by ANTLR 4.9.2
+// Generated from C:/Users/Tommaso/Documents/Progetti/Java/Jlambda/src/main/java/com/jlambda/core\Jlambda.g4 by ANTLR 4.9.2
 package com.jlambda.core;
 
 import org.antlr.v4.runtime.atn.*;
@@ -22,7 +22,7 @@ public class JlambdaParser extends Parser {
             new PredictionContextCache();
     public static final int
             T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, T__7 = 8, T__8 = 9,
-            VARIABLE = 10, OPERATOR = 11, STRING = 12, FLOAT = 13, INT = 14, BOOL = 15, WS = 16;
+            VARIABLE = 10, STRING = 11, FLOAT = 12, INT = 13, BOOL = 14, COOMENT = 15, WS = 16;
     public static final int
             RULE_expr = 0, RULE_let = 1, RULE_stmt = 2;
 
@@ -36,7 +36,7 @@ public class JlambdaParser extends Parser {
 
     private static String[] makeLiteralNames() {
         return new String[] {
-                null, "'('", "')'", "'\u00CE\u00BB'", "'fun'", "'.'", "'->'", "'in'",
+                null, "'in'", "'\u00CE\u00BB'", "'fun'", "'.'", "'->'", "'('", "')'",
                 "'let'", "'='"
         };
     }
@@ -46,7 +46,7 @@ public class JlambdaParser extends Parser {
     private static String[] makeSymbolicNames() {
         return new String[] {
                 null, null, null, null, null, null, null, null, null, null, "VARIABLE",
-                "OPERATOR", "STRING", "FLOAT", "INT", "BOOL", "WS"
+                "STRING", "FLOAT", "INT", "BOOL", "COOMENT", "WS"
         };
     }
 
@@ -111,6 +111,10 @@ public class JlambdaParser extends Parser {
     }
 
     public static class ExprContext extends ParserRuleContext {
+        public LetContext let() {
+            return getRuleContext(LetContext.class, 0);
+        }
+
         public List<ExprContext> expr() {
             return getRuleContexts(ExprContext.class);
         }
@@ -121,14 +125,6 @@ public class JlambdaParser extends Parser {
 
         public TerminalNode VARIABLE() {
             return getToken(JlambdaParser.VARIABLE, 0);
-        }
-
-        public LetContext let() {
-            return getRuleContext(LetContext.class, 0);
-        }
-
-        public TerminalNode OPERATOR() {
-            return getToken(JlambdaParser.OPERATOR, 0);
         }
 
         public TerminalNode STRING() {
@@ -173,115 +169,85 @@ public class JlambdaParser extends Parser {
             int _alt;
             enterOuterAlt(_localctx, 1);
             {
-                setState(33);
+                setState(24);
                 _errHandler.sync(this);
-                switch (getInterpreter().adaptivePredict(_input, 1, _ctx)) {
-                    case 1: {
+                switch (_input.LA(1)) {
+                    case T__7: {
                         setState(7);
-                        match(T__0);
+                        let();
                         setState(8);
-                        expr(0);
-                        setState(9);
-                        match(T__1);
-                        setState(11);
-                        _errHandler.sync(this);
-                        _alt = 1;
-                        do {
-                            switch (_alt) {
-                                case 1: {
-                                    {
-                                        setState(10);
-                                        expr(0);
-                                    }
-                                }
-                                break;
-                                default:
-                                    throw new NoViableAltException(this);
-                            }
-                            setState(13);
-                            _errHandler.sync(this);
-                            _alt = getInterpreter().adaptivePredict(_input, 0, _ctx);
-                        } while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
-                    }
-                    break;
-                    case 2: {
-                        setState(15);
                         match(T__0);
-                        setState(16);
-                        expr(0);
-                        setState(17);
-                        match(T__1);
+                        setState(9);
+                        expr(9);
                     }
                     break;
-                    case 3: {
-                        setState(19);
+                    case T__1:
+                    case T__2: {
+                        setState(11);
                         _la = _input.LA(1);
-                        if (!(_la == T__2 || _la == T__3)) {
+                        if (!(_la == T__1 || _la == T__2)) {
                             _errHandler.recoverInline(this);
                         } else {
                             if (_input.LA(1) == Token.EOF) matchedEOF = true;
                             _errHandler.reportMatch(this);
                             consume();
                         }
-                        setState(20);
+                        setState(12);
                         match(VARIABLE);
-                        setState(21);
+                        setState(13);
                         _la = _input.LA(1);
-                        if (!(_la == T__4 || _la == T__5)) {
+                        if (!(_la == T__3 || _la == T__4)) {
                             _errHandler.recoverInline(this);
                         } else {
                             if (_input.LA(1) == Token.EOF) matchedEOF = true;
                             _errHandler.reportMatch(this);
                             consume();
                         }
-                        setState(22);
+                        setState(14);
                         expr(8);
                     }
                     break;
-                    case 4: {
-                        setState(23);
-                        let();
-                        setState(24);
-                        match(T__6);
-                        setState(25);
-                        expr(7);
-                    }
-                    break;
-                    case 5: {
-                        setState(27);
-                        match(OPERATOR);
-                    }
-                    break;
-                    case 6: {
-                        setState(28);
+                    case STRING: {
+                        setState(15);
                         match(STRING);
                     }
                     break;
-                    case 7: {
-                        setState(29);
+                    case FLOAT: {
+                        setState(16);
                         match(FLOAT);
                     }
                     break;
-                    case 8: {
-                        setState(30);
+                    case INT: {
+                        setState(17);
                         match(INT);
                     }
                     break;
-                    case 9: {
-                        setState(31);
+                    case BOOL: {
+                        setState(18);
                         match(BOOL);
                     }
                     break;
-                    case 10: {
-                        setState(32);
+                    case VARIABLE: {
+                        setState(19);
                         match(VARIABLE);
                     }
                     break;
+                    case T__5: {
+                        setState(20);
+                        match(T__5);
+                        setState(21);
+                        expr(0);
+                        setState(22);
+                        match(T__6);
+                    }
+                    break;
+                    default:
+                        throw new NoViableAltException(this);
                 }
                 _ctx.stop = _input.LT(-1);
-                setState(46);
+                setState(34);
                 _errHandler.sync(this);
-                _alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
+                _alt = getInterpreter().adaptivePredict(_input, 2, _ctx);
                 while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
                     if (_alt == 1) {
                         if (_parseListeners != null) triggerExitRuleEvent();
@@ -290,38 +256,33 @@ public class JlambdaParser extends Parser {
                             {
                                 _localctx = new ExprContext(_parentctx, _parentState);
                                 pushNewRecursionContext(_localctx, _startState, RULE_expr);
-                                setState(35);
-                                if (!(precpred(_ctx, 10)))
-                                    throw new FailedPredicateException(this, "precpred(_ctx, 10)");
-                                setState(40);
+                                setState(26);
+                                if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+                                setState(28);
                                 _errHandler.sync(this);
                                 _alt = 1;
                                 do {
                                     switch (_alt) {
                                         case 1: {
                                             {
-                                                setState(36);
-                                                match(T__0);
-                                                setState(37);
+                                                setState(27);
                                                 expr(0);
-                                                setState(38);
-                                                match(T__1);
                                             }
                                         }
                                         break;
                                         default:
                                             throw new NoViableAltException(this);
                                     }
-                                    setState(42);
+                                    setState(30);
                                     _errHandler.sync(this);
-                                    _alt = getInterpreter().adaptivePredict(_input, 2, _ctx);
+                                    _alt = getInterpreter().adaptivePredict(_input, 1, _ctx);
                                 } while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
                             }
                         }
                     }
-                    setState(48);
+                    setState(36);
                     _errHandler.sync(this);
-                    _alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
+                    _alt = getInterpreter().adaptivePredict(_input, 2, _ctx);
                 }
             }
         } catch (RecognitionException re) {
@@ -335,16 +296,12 @@ public class JlambdaParser extends Parser {
     }
 
     public static class LetContext extends ParserRuleContext {
-        public ExprContext expr() {
-            return getRuleContext(ExprContext.class, 0);
-        }
-
         public TerminalNode VARIABLE() {
             return getToken(JlambdaParser.VARIABLE, 0);
         }
 
-        public TerminalNode OPERATOR() {
-            return getToken(JlambdaParser.OPERATOR, 0);
+        public ExprContext expr() {
+            return getRuleContext(ExprContext.class, 0);
         }
 
         public LetContext(ParserRuleContext parent, int invokingState) {
@@ -360,24 +317,16 @@ public class JlambdaParser extends Parser {
     public final LetContext let() throws RecognitionException {
         LetContext _localctx = new LetContext(_ctx, getState());
         enterRule(_localctx, 2, RULE_let);
-        int _la;
         try {
             enterOuterAlt(_localctx, 1);
             {
-                setState(49);
+                setState(37);
                 match(T__7);
-                setState(50);
-                _la = _input.LA(1);
-                if (!(_la == VARIABLE || _la == OPERATOR)) {
-                    _errHandler.recoverInline(this);
-                } else {
-                    if (_input.LA(1) == Token.EOF) matchedEOF = true;
-                    _errHandler.reportMatch(this);
-                    consume();
-                }
-                setState(51);
+                setState(38);
+                match(VARIABLE);
+                setState(39);
                 match(T__8);
-                setState(52);
+                setState(40);
                 expr(0);
             }
         } catch (RecognitionException re) {
@@ -424,27 +373,27 @@ public class JlambdaParser extends Parser {
         try {
             enterOuterAlt(_localctx, 1);
             {
-                setState(58);
+                setState(46);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__3) | (1L << T__7) | (1L << VARIABLE) | (1L << OPERATOR) | (1L << STRING) | (1L << FLOAT) | (1L << INT) | (1L << BOOL))) != 0)) {
+                while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__1) | (1L << T__2) | (1L << T__5) | (1L << T__7) | (1L << VARIABLE) | (1L << STRING) | (1L << FLOAT) | (1L << INT) | (1L << BOOL))) != 0)) {
                     {
-                        setState(56);
+                        setState(44);
                         _errHandler.sync(this);
-                        switch (getInterpreter().adaptivePredict(_input, 4, _ctx)) {
+                        switch (getInterpreter().adaptivePredict(_input, 3, _ctx)) {
                             case 1: {
-                                setState(54);
+                                setState(42);
                                 let();
                             }
                             break;
                             case 2: {
-                                setState(55);
+                                setState(43);
                                 expr(0);
                             }
                             break;
                         }
                     }
-                    setState(60);
+                    setState(48);
                     _errHandler.sync(this);
                     _la = _input.LA(1);
                 }
@@ -470,30 +419,27 @@ public class JlambdaParser extends Parser {
     private boolean expr_sempred(ExprContext _localctx, int predIndex) {
         switch (predIndex) {
             case 0:
-                return precpred(_ctx, 10);
+                return precpred(_ctx, 1);
         }
         return true;
     }
 
     public static final String _serializedATN =
-            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\22@\4\2\t\2\4\3\t" +
-                    "\3\4\4\t\4\3\2\3\2\3\2\3\2\3\2\6\2\16\n\2\r\2\16\2\17\3\2\3\2\3\2\3\2" +
-                    "\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\5\2$\n\2\3\2" +
-                    "\3\2\3\2\3\2\3\2\6\2+\n\2\r\2\16\2,\7\2/\n\2\f\2\16\2\62\13\2\3\3\3\3" +
-                    "\3\3\3\3\3\3\3\4\3\4\7\4;\n\4\f\4\16\4>\13\4\3\4\2\3\2\5\2\4\6\2\5\3\2" +
-                    "\5\6\3\2\7\b\3\2\f\r\2J\2#\3\2\2\2\4\63\3\2\2\2\6<\3\2\2\2\b\t\b\2\1\2" +
-                    "\t\n\7\3\2\2\n\13\5\2\2\2\13\r\7\4\2\2\f\16\5\2\2\2\r\f\3\2\2\2\16\17" +
-                    "\3\2\2\2\17\r\3\2\2\2\17\20\3\2\2\2\20$\3\2\2\2\21\22\7\3\2\2\22\23\5" +
-                    "\2\2\2\23\24\7\4\2\2\24$\3\2\2\2\25\26\t\2\2\2\26\27\7\f\2\2\27\30\t\3" +
-                    "\2\2\30$\5\2\2\n\31\32\5\4\3\2\32\33\7\t\2\2\33\34\5\2\2\t\34$\3\2\2\2" +
-                    "\35$\7\r\2\2\36$\7\16\2\2\37$\7\17\2\2 $\7\20\2\2!$\7\21\2\2\"$\7\f\2" +
-                    "\2#\b\3\2\2\2#\21\3\2\2\2#\25\3\2\2\2#\31\3\2\2\2#\35\3\2\2\2#\36\3\2" +
-                    "\2\2#\37\3\2\2\2# \3\2\2\2#!\3\2\2\2#\"\3\2\2\2$\60\3\2\2\2%*\f\f\2\2" +
-                    "&\'\7\3\2\2\'(\5\2\2\2()\7\4\2\2)+\3\2\2\2*&\3\2\2\2+,\3\2\2\2,*\3\2\2" +
-                    "\2,-\3\2\2\2-/\3\2\2\2.%\3\2\2\2/\62\3\2\2\2\60.\3\2\2\2\60\61\3\2\2\2" +
-                    "\61\3\3\2\2\2\62\60\3\2\2\2\63\64\7\n\2\2\64\65\t\4\2\2\65\66\7\13\2\2" +
-                    "\66\67\5\2\2\2\67\5\3\2\2\28;\5\4\3\29;\5\2\2\2:8\3\2\2\2:9\3\2\2\2;>" +
-                    "\3\2\2\2<:\3\2\2\2<=\3\2\2\2=\7\3\2\2\2><\3\2\2\2\b\17#,\60:<";
+            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\22\64\4\2\t\2\4\3" +
+                    "\t\3\4\4\t\4\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3" +
+                    "\2\3\2\3\2\3\2\5\2\33\n\2\3\2\3\2\6\2\37\n\2\r\2\16\2 \7\2#\n\2\f\2\16" +
+                    "\2&\13\2\3\3\3\3\3\3\3\3\3\3\3\4\3\4\7\4/\n\4\f\4\16\4\62\13\4\3\4\2\3" +
+                    "\2\5\2\4\6\2\4\3\2\4\5\3\2\6\7\2;\2\32\3\2\2\2\4\'\3\2\2\2\6\60\3\2\2" +
+                    "\2\b\t\b\2\1\2\t\n\5\4\3\2\n\13\7\3\2\2\13\f\5\2\2\13\f\33\3\2\2\2\r\16" +
+                    "\t\2\2\2\16\17\7\f\2\2\17\20\t\3\2\2\20\33\5\2\2\n\21\33\7\r\2\2\22\33" +
+                    "\7\16\2\2\23\33\7\17\2\2\24\33\7\20\2\2\25\33\7\f\2\2\26\27\7\b\2\2\27" +
+                    "\30\5\2\2\2\30\31\7\t\2\2\31\33\3\2\2\2\32\b\3\2\2\2\32\r\3\2\2\2\32\21" +
+                    "\3\2\2\2\32\22\3\2\2\2\32\23\3\2\2\2\32\24\3\2\2\2\32\25\3\2\2\2\32\26" +
+                    "\3\2\2\2\33$\3\2\2\2\34\36\f\3\2\2\35\37\5\2\2\2\36\35\3\2\2\2\37 \3\2" +
+                    "\2\2 \36\3\2\2\2 !\3\2\2\2!#\3\2\2\2\"\34\3\2\2\2#&\3\2\2\2$\"\3\2\2\2" +
+                    "$%\3\2\2\2%\3\3\2\2\2&$\3\2\2\2\'(\7\n\2\2()\7\f\2\2)*\7\13\2\2*+\5\2" +
+                    "\2\2+\5\3\2\2\2,/\5\4\3\2-/\5\2\2\2.,\3\2\2\2.-\3\2\2\2/\62\3\2\2\2\60" +
+                    ".\3\2\2\2\60\61\3\2\2\2\61\7\3\2\2\2\62\60\3\2\2\2\7\32 $.\60";
     public static final ATN _ATN =
             new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 

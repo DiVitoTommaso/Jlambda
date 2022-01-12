@@ -2,19 +2,19 @@ grammar Jlambda;
 
 
 expr:
-    '(' expr ')'  expr+ | expr ('(' expr ')')+ | '(' expr ')'
+     let 'in' expr
     | ('λ'|'fun') VARIABLE ('.'|'->') expr
-    | let 'in' expr
-    | OPERATOR
     | STRING
     | FLOAT
     | INT
     | BOOL
     | VARIABLE
+    | '(' expr ')'
+    | expr expr+
     ;
 
 
-let: 'let' (VARIABLE|OPERATOR) '=' expr;
+let: 'let' VARIABLE '=' expr;
 
 stmt: (let|expr)*;
 
@@ -31,7 +31,6 @@ fragment IdentifierStart
 
 VARIABLE: IdentifierStart IdentifierPart*;
 
-OPERATOR: '+'|'-'|'*'|'**'|'/'|'==';
 STRING: '"' .*? '"' | '\'' .*? '\'';
 FLOAT: [0-9]+ '.' [0-9]*;
 INT: [0-9]+;

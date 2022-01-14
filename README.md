@@ -19,7 +19,7 @@ Minimal functional programming language like lambda calculus written in java wit
 3) Don't edit eval method, register method or env field (hashmap) or interpreter will break
 4) You can instantiate from external project as many interpreters as you want you need only to instantiate the JlambdaInterpreter class
 5) You can register native java methods using the method register of the interpreter instance (method is visible only to that instance)
-6) You can evaluate code using eval method of the interpreter instance
+6) You can evaluate code using eval method of the interpreter instance (multiple expressions must be separated by ';')
 7) You can reset the environment of the interpreter instance using the method reset
 8) JLBuiltin class contains some useful native method that can be registered to the interpreter 
 9) Evaluation will extend global enviroment associated to the thread who invoked the expression evaluation and it won't reset at the end of the eval method call.
@@ -33,7 +33,7 @@ Minimal functional programming language like lambda calculus written in java wit
 
 # Expression example
 ```
-let if = fun c -> fun then -> fun else -> (c(then)(else))
-let Ω = fun x -> (x(x)) #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
-let one = 1 in equal(one)(one) # assuming equal is native registered #
+let if = fun c -> fun then -> fun else -> (c(then)(else));
+let Ω = fun x -> (x(x));#  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
+let one = 1 in equal(one)(one) # assuming equal is native registered; #
 ```

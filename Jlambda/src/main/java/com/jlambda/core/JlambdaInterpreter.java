@@ -244,30 +244,35 @@ public class JlambdaInterpreter {
         return ctx.VARIABLE().toString() + " => " + res.toString();
     }
 
-    private void stmt(JlambdaParser.StmtContext ctx) {
+    private String stmt(JlambdaParser.StmtContext ctx) {
         try {
+            StringBuilder result = new StringBuilder();
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp)
-                    System.out.println("val " + let(tmp, env));
+                    result.append("val ").append(let(tmp, env));
                 if (tree instanceof JlambdaParser.ExprContext tmp)
-                    System.out.println("val - => " + expr(tmp, env));
+                    result.append("val - => ").append(expr(tmp, env));
             }
+
+            return result.toString();
         } catch (StackOverflowError e) {
-            System.err.println("LoopError: infinite function application in expression: " + ctx.getText());
+            throw new Error("LoopError: infinite function application in expression: " + ctx.getText());
         } catch (OutOfMemoryError e) {
-            System.err.println("MemoryError: memory limit reached in expression: " + ctx.getText());
+            throw new Error("MemoryError: memory limit reached in expression: " + ctx.getText());
         }
     }
 
     /**
      * evaluate Jlambda code
+     *
      * @param code code to eval
+     * @return the output of the evaluation
      */
 
-    public synchronized void eval(String code) {
+    public synchronized String eval(String code) {
         JlambdaLexer lexer = new JlambdaLexer(CharStreams.fromString(code));
         JlambdaParser parser = new JlambdaParser(new CommonTokenStream(lexer));
-        stmt(parser.stmt());
+        return stmt(parser.stmt());
     }
 
     /**
@@ -279,8 +284,9 @@ public class JlambdaInterpreter {
 
     /**
      * register native java method to the interpreter
+     *
      * @param var name to associate the method
-     * @param m the method to register
+     * @param m   the method to register
      */
     public synchronized void register(String var, Method m) {
         env.put(var, new JlambdaInterpreter.JavaFunction(m));

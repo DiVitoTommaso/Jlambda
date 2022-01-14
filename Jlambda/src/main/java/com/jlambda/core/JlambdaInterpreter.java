@@ -287,10 +287,11 @@ public class JlambdaInterpreter {
      *
      * @param var name to associate the method
      * @param m   the method to register
+     * @return the result of the evaluation
      */
-    public synchronized void register(String var, Method m) {
+    public synchronized String register(String var, Method m) {
         env.put(var, new JlambdaInterpreter.JavaFunction(m));
-        System.out.println("val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount()));
+        return "val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount());
     }
 
 }

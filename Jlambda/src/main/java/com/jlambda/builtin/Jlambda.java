@@ -36,7 +36,7 @@ class Jlambda {
         System.out.print(">> ");
         while (true)
             try {
-                interpreter.eval(scanner.nextLine());
+                System.out.println(interpreter.eval(scanner.nextLine()));
                 System.out.print(">> ");
             } catch (Error e) {
                 System.err.println(e.getMessage());

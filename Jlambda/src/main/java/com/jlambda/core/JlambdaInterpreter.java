@@ -1,5 +1,7 @@
 package com.jlambda.core;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.lang.reflect.Method;
@@ -9,7 +11,7 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class JlambdaInterpreter {
 
-    private static final HashMap<Thread, HashMap<String, JlambdaInterpreter.Expression>> envs = new HashMap<>();
+    private final HashMap<String, Expression> env = new HashMap<>();
 
     private static abstract class Expression {
     }
@@ -242,10 +244,7 @@ public class JlambdaInterpreter {
         return ctx.VARIABLE().toString() + " => " + res.toString();
     }
 
-    public static void stmt(JlambdaParser.StmtContext ctx) {
-        envs.putIfAbsent(Thread.currentThread(), new HashMap<>());
-        HashMap<String, Expression> env = envs.get(Thread.currentThread());
-
+    private void stmt(JlambdaParser.StmtContext ctx) {
         try {
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp)
@@ -255,15 +254,35 @@ public class JlambdaInterpreter {
             }
         } catch (StackOverflowError e) {
             System.err.println("LoopError: infinite function application in expression: " + ctx.getText());
-        } catch (OutOfMemoryError e){
+        } catch (OutOfMemoryError e) {
             System.err.println("MemoryError: memory limit reached in expression: " + ctx.getText());
         }
     }
 
-    public static void register(String var, Method m) {
-        envs.putIfAbsent(Thread.currentThread(), new HashMap<>());
-        HashMap<String, Expression> env = envs.get(Thread.currentThread());
+    /**
+     * evaluate Jlambda code
+     * @param code code to eval
+     */
 
+    public synchronized void eval(String code) {
+        JlambdaLexer lexer = new JlambdaLexer(CharStreams.fromString(code));
+        JlambdaParser parser = new JlambdaParser(new CommonTokenStream(lexer));
+        stmt(parser.stmt());
+    }
+
+    /**
+     * reset the environment to empty
+     */
+    public synchronized void reset() {
+        env.clear();
+    }
+
+    /**
+     * register native java method to the interpreter
+     * @param var name to associate the method
+     * @param m the method to register
+     */
+    public synchronized void register(String var, Method m) {
         env.put(var, new JlambdaInterpreter.JavaFunction(m));
         System.out.println("val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount()));
     }

@@ -1,5 +1,6 @@
 grammar Jlambda;
 
+stmt: ((let | expr) (';' | EOF))*;
 
 expr:
      let 'in' expr
@@ -13,10 +14,12 @@ expr:
     | expr expr+
     ;
 
-
 let: 'let' VARIABLE '=' expr;
 
-stmt: (let|expr)*;
+STRING: '"' .*? '"' | '\'' .*? '\'';
+FLOAT: [0-9]+ '.' [0-9]*;
+INT: [0-9]+;
+BOOL: 'true'| 'false';
 
 fragment IdentifierPart
     : IdentifierStart
@@ -31,10 +34,5 @@ fragment IdentifierStart
 
 VARIABLE: IdentifierStart IdentifierPart*;
 
-STRING: '"' .*? '"' | '\'' .*? '\'';
-FLOAT: [0-9]+ '.' [0-9]*;
-INT: [0-9]+;
-BOOL: 'true'| 'false';
-
-COOMENT: '#' .*? '#' -> skip;
+COMMENT: '#' .*? '#' -> skip;
 WS: [ \t\r\n] -> skip;

@@ -25,6 +25,7 @@ Minimal functional programming language like lambda calculus written in java wit
 9) Evaluation will extend global enviroment associated to the thread who invoked the expression evaluation and it won't reset at the end of the eval method call.
 10) If an error occur the environment created before the error will remain and an error will be raised
 11) Each interpreter is synchronized. Only one thread at a time can use methods of an interpreter instance
+12) The grammar of this language can be found in the same directory of the interpreter class (Jlambda.g4) in ANTLR form
 
 # Libraries requirements
 

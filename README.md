@@ -14,7 +14,7 @@ Minimal functional programming language like lambda calculus written in java wit
 
 # How To
 
-1) You can run the project using the Jlambda class in the [main.java.com.jlambda.builtin] directory as a normal maven project, or using the jar.
+1) You can run the project using the Jlambda class in the [main.java.com.jlambda.builtin] directory as a normal maven project, or using the jar located in runnable directory.
 2) You can pass a file as argument when you run the Jlambda class as main class and this will evaluate the code of the file and will open a console where you can see errors, well done evaluations of the file and possibility to evaluate manual code at runtime (no reset possible)
 3) Don't edit eval method, register method or env field (hashmap) or interpreter will break
 4) You can instantiate from external project as many interpreters as you want you need only to instantiate the JlambdaInterpreter class

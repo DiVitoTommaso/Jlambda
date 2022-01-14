@@ -1,10 +1,6 @@
 package com.jlambda.builtin;
 
 import com.jlambda.core.JlambdaInterpreter;
-import com.jlambda.core.JlambdaLexer;
-import com.jlambda.core.JlambdaParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.FileInputStream;
 import java.util.Scanner;

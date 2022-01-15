@@ -3,16 +3,17 @@ Minimal functional programming language like lambda calculus written in java wit
 1) Higher-order function support
 2) Partial functions
 3) Static scoping
-4) Shadowing support (for let and let-in)
-5) Possibility to load native java function and possibility to treat them as normal function of this language (they support partial application, but you can work only with primitives of the language (int, float, string, double, boolean or their super classes) as parameters and return type must be instance of (int, float, string, double, boolean)) or function will raise an error
-6) 'If' statement for expression selection with only boolean guards
-7) Dynamic type checking
+4) Dynamic type checking
+5) Shadowing support (for let and let-in)
+6) Possibility to load native java function and possibility to treat them as normal function of this language (they support partial application, but you can work only with primitives of the language (int, float, string, double, boolean or their super classes) as parameters and return type must be instance of (int, float, string, double, boolean)) or function will raise an error
+7) 'If' statement for expression selection with only boolean guards support
 8) 'Let' support to assign a name to an expression, function or result of a function application
 9) 'Let-in' support to assign a name visible only in the expression which follows 'in' locally (as ocaml)
-10) No static analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, but you get errors for unbound names (variables) only during function application not during declaration. (functions with free variable will compile, but they'll fail at invocation time)
-11) Language is interpreted so evaluation will take very long time
-12) Functions declarations and let in create copy of the enviroment to be able to extend them using static scoping, shadowing, and local declarations => memory usage very high
-13) Toy language not for real usage
+10) Static analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, you get errors for unbound names (variables) during function delaration. (functions with free variable won't compile)
+11) Recursion not supported natively. 'Let' and 'Let-in' function declaration can't see their name during declaration. (Consider using 'Y' combinator)
+12) Language is interpreted so evaluation will be slow
+13) Functions declarations and let in create copy of the enviroment to be able to extend them using static scoping, shadowing, and local declarations => memory usage very high
+14) Toy language not for real usage
 
 # How To
 

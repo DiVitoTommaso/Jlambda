@@ -52,7 +52,7 @@ public class JlambdaInterpreter {
 
         @Override
         public String toString() {
-            return v;
+            return '"' + v + '"';
         }
     }
 
@@ -200,7 +200,7 @@ public class JlambdaInterpreter {
 
             // string
             if (ctx.STRING() != null)
-                return new JLString(ctx.STRING().getText());
+                return new JLString(ctx.STRING().getText().substring(1, ctx.STRING().getText().length() - 1));
 
             // var
             if (ctx.VARIABLE() != null)

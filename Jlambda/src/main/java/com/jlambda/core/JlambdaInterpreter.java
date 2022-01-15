@@ -3,6 +3,7 @@ package com.jlambda.core;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -171,7 +172,7 @@ public class JlambdaInterpreter {
         if (e instanceof JLFun)
             return "function";
         if (e instanceof JavaFunction)
-            return "java function";
+            return "native function";
         if (e instanceof JLInt)
             return "int";
         if (e instanceof JLString)
@@ -197,7 +198,7 @@ public class JlambdaInterpreter {
 
             // bool
             if (ctx.BOOL() != null)
-                return new JLFloat(Double.parseDouble(ctx.BOOL().toString()));
+                return new JLBool(Boolean.parseBoolean(ctx.BOOL().toString()));
 
             // string
             if (ctx.STRING() != null)
@@ -208,18 +209,30 @@ public class JlambdaInterpreter {
                 return env.get(ctx.VARIABLE().toString());
         }
         // local declaration
-        if (ctx.expr().size() == 1 && ctx.let() != null) {
+        if (ctx.let() != null) {
             HashMap<String, Expression> newEnv = (HashMap<String, Expression>) env.clone();
             let(ctx.let(), newEnv);
             return expr(ctx.expr(0), newEnv);
         }
 
         // function declaration
-        if (ctx.expr().size() == 1 && ctx.VARIABLE() != null)
-            return new JLFun(ctx.VARIABLE().toString(), ctx.expr(0), env);
+        if (ctx.fun() != null)
+            return new JLFun(ctx.fun().VARIABLE().toString(), ctx.fun().expr(), env);
+
+        // if statement
+        if (ctx.select() != null) {
+            Expression result = expr(ctx.select().expr(0), env);
+            if(!(result instanceof JLBool tmp))
+                throw new Error("TypeError: non boolean if guard");
+
+            if (tmp.v)
+                return expr(ctx.select().expr(1), env);
+            else
+                return expr(ctx.select().expr(2), env);
+        }
 
         // expr between parentheses
-        if (ctx.expr().size() == 1 && ctx.VARIABLE() == null)
+        if (ctx.expr().size() == 1)
             return expr(ctx.expr(0), env);
 
         // apply => first function, second and other can be functions or values
@@ -253,12 +266,9 @@ public class JlambdaInterpreter {
                 if (tree instanceof JlambdaParser.ExprContext tmp)
                     result.append("val - => ").append(expr(tmp, env));
             }
-
             return result.toString();
         } catch (StackOverflowError e) {
             throw new Error("LoopError: infinite function application in expression: " + ctx.getText());
-        } catch (OutOfMemoryError e) {
-            throw new Error("MemoryError: memory limit reached in expression: " + ctx.getText());
         }
     }
 

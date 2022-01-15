@@ -22,14 +22,14 @@ public class JlambdaParser extends Parser {
             new PredictionContextCache();
     public static final int
             T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, T__7 = 8, T__8 = 9,
-            T__9 = 10, STRING = 11, FLOAT = 12, INT = 13, BOOL = 14, VARIABLE = 15, COMMENT = 16,
-            WS = 17;
+            T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, STRING = 14, FLOAT = 15, INT = 16, BOOL = 17,
+            VARIABLE = 18, COMMENT = 19, WS = 20;
     public static final int
-            RULE_stmt = 0, RULE_expr = 1, RULE_let = 2;
+            RULE_stmt = 0, RULE_expr = 1, RULE_fun = 2, RULE_select = 3, RULE_let = 4;
 
     private static String[] makeRuleNames() {
         return new String[] {
-                "stmt", "expr", "let"
+                "stmt", "expr", "fun", "select", "let"
         };
     }
 
@@ -37,8 +37,8 @@ public class JlambdaParser extends Parser {
 
     private static String[] makeLiteralNames() {
         return new String[] {
-                null, "';'", "'in'", "'\u00CE\u00BB'", "'fun'", "'.'", "'->'", "'('",
-                "')'", "'let'", "'='"
+                null, "';'", "'in'", "'('", "')'", "'\u00CE\u00BB'", "'fun'", "'.'",
+                "'->'", "'if'", "'then'", "'else'", "'let'", "'='"
         };
     }
 
@@ -46,8 +46,9 @@ public class JlambdaParser extends Parser {
 
     private static String[] makeSymbolicNames() {
         return new String[] {
-                null, null, null, null, null, null, null, null, null, null, null, "STRING",
-                "FLOAT", "INT", "BOOL", "VARIABLE", "COMMENT", "WS"
+                null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, "STRING", "FLOAT", "INT", "BOOL", "VARIABLE", "COMMENT",
+                "WS"
         };
     }
 
@@ -153,27 +154,27 @@ public class JlambdaParser extends Parser {
         try {
             enterOuterAlt(_localctx, 1);
             {
-                setState(14);
+                setState(18);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__3) | (1L << T__6) | (1L << T__8) | (1L << STRING) | (1L << FLOAT) | (1L << INT) | (1L << BOOL) | (1L << VARIABLE))) != 0)) {
+                while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__4) | (1L << T__5) | (1L << T__8) | (1L << T__11) | (1L << STRING) | (1L << FLOAT) | (1L << INT) | (1L << BOOL) | (1L << VARIABLE))) != 0)) {
                     {
                         {
-                            setState(8);
+                            setState(12);
                             _errHandler.sync(this);
                             switch (getInterpreter().adaptivePredict(_input, 0, _ctx)) {
                                 case 1: {
-                                    setState(6);
+                                    setState(10);
                                     let();
                                 }
                                 break;
                                 case 2: {
-                                    setState(7);
+                                    setState(11);
                                     expr(0);
                                 }
                                 break;
                             }
-                            setState(10);
+                            setState(14);
                             _la = _input.LA(1);
                             if (!(_la == EOF || _la == T__0)) {
                                 _errHandler.recoverInline(this);
@@ -184,7 +185,7 @@ public class JlambdaParser extends Parser {
                             }
                         }
                     }
-                    setState(16);
+                    setState(20);
                     _errHandler.sync(this);
                     _la = _input.LA(1);
                 }
@@ -212,8 +213,12 @@ public class JlambdaParser extends Parser {
             return getRuleContext(ExprContext.class, i);
         }
 
-        public TerminalNode VARIABLE() {
-            return getToken(JlambdaParser.VARIABLE, 0);
+        public FunContext fun() {
+            return getRuleContext(FunContext.class, 0);
+        }
+
+        public SelectContext select() {
+            return getRuleContext(SelectContext.class, 0);
         }
 
         public TerminalNode STRING() {
@@ -230,6 +235,10 @@ public class JlambdaParser extends Parser {
 
         public TerminalNode BOOL() {
             return getToken(JlambdaParser.BOOL, 0);
+        }
+
+        public TerminalNode VARIABLE() {
+            return getToken(JlambdaParser.VARIABLE, 0);
         }
 
         public ExprContext(ParserRuleContext parent, int invokingState) {
@@ -253,88 +262,72 @@ public class JlambdaParser extends Parser {
         ExprContext _prevctx = _localctx;
         int _startState = 2;
         enterRecursionRule(_localctx, 2, RULE_expr, _p);
-        int _la;
         try {
             int _alt;
             enterOuterAlt(_localctx, 1);
             {
-                setState(35);
+                setState(37);
                 _errHandler.sync(this);
                 switch (_input.LA(1)) {
-                    case T__8: {
-                        setState(18);
+                    case T__11: {
+                        setState(22);
                         let();
-                        setState(19);
+                        setState(23);
                         match(T__1);
-                        setState(20);
-                        expr(9);
+                        setState(24);
+                        expr(10);
                     }
                     break;
-                    case T__2:
-                    case T__3: {
-                        setState(22);
-                        _la = _input.LA(1);
-                        if (!(_la == T__2 || _la == T__3)) {
-                            _errHandler.recoverInline(this);
-                        } else {
-                            if (_input.LA(1) == Token.EOF) matchedEOF = true;
-                            _errHandler.reportMatch(this);
-                            consume();
-                        }
-                        setState(23);
-                        match(VARIABLE);
-                        setState(24);
-                        _la = _input.LA(1);
-                        if (!(_la == T__4 || _la == T__5)) {
-                            _errHandler.recoverInline(this);
-                        } else {
-                            if (_input.LA(1) == Token.EOF) matchedEOF = true;
-                            _errHandler.reportMatch(this);
-                            consume();
-                        }
-                        setState(25);
-                        expr(8);
+                    case T__4:
+                    case T__5: {
+                        setState(26);
+                        fun();
+                    }
+                    break;
+                    case T__8: {
+                        setState(27);
+                        select();
                     }
                     break;
                     case STRING: {
-                        setState(26);
+                        setState(28);
                         match(STRING);
                     }
                     break;
                     case FLOAT: {
-                        setState(27);
+                        setState(29);
                         match(FLOAT);
                     }
                     break;
                     case INT: {
-                        setState(28);
+                        setState(30);
                         match(INT);
                     }
                     break;
                     case BOOL: {
-                        setState(29);
+                        setState(31);
                         match(BOOL);
                     }
                     break;
                     case VARIABLE: {
-                        setState(30);
+                        setState(32);
                         match(VARIABLE);
                     }
                     break;
-                    case T__6: {
-                        setState(31);
-                        match(T__6);
-                        setState(32);
-                        expr(0);
+                    case T__2: {
                         setState(33);
-                        match(T__7);
+                        match(T__2);
+                        setState(34);
+                        expr(0);
+                        setState(35);
+                        match(T__3);
                     }
                     break;
                     default:
                         throw new NoViableAltException(this);
                 }
                 _ctx.stop = _input.LT(-1);
-                setState(45);
+                setState(47);
                 _errHandler.sync(this);
                 _alt = getInterpreter().adaptivePredict(_input, 4, _ctx);
                 while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
@@ -345,16 +338,16 @@ public class JlambdaParser extends Parser {
                             {
                                 _localctx = new ExprContext(_parentctx, _parentState);
                                 pushNewRecursionContext(_localctx, _startState, RULE_expr);
-                                setState(37);
-                                if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
                                 setState(39);
+                                if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+                                setState(41);
                                 _errHandler.sync(this);
                                 _alt = 1;
                                 do {
                                     switch (_alt) {
                                         case 1: {
                                             {
-                                                setState(38);
+                                                setState(40);
                                                 expr(0);
                                             }
                                         }
@@ -362,14 +355,14 @@ public class JlambdaParser extends Parser {
                                         default:
                                             throw new NoViableAltException(this);
                                     }
-                                    setState(41);
+                                    setState(43);
                                     _errHandler.sync(this);
                                     _alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
                                 } while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
                             }
                         }
                     }
-                    setState(47);
+                    setState(49);
                     _errHandler.sync(this);
                     _alt = getInterpreter().adaptivePredict(_input, 4, _ctx);
                 }
@@ -380,6 +373,113 @@ public class JlambdaParser extends Parser {
             _errHandler.recover(this, re);
         } finally {
             unrollRecursionContexts(_parentctx);
+        }
+        return _localctx;
+    }
+
+    public static class FunContext extends ParserRuleContext {
+        public TerminalNode VARIABLE() {
+            return getToken(JlambdaParser.VARIABLE, 0);
+        }
+
+        public ExprContext expr() {
+            return getRuleContext(ExprContext.class, 0);
+        }
+
+        public FunContext(ParserRuleContext parent, int invokingState) {
+            super(parent, invokingState);
+        }
+
+        @Override
+        public int getRuleIndex() {
+            return RULE_fun;
+        }
+    }
+
+    public final FunContext fun() throws RecognitionException {
+        FunContext _localctx = new FunContext(_ctx, getState());
+        enterRule(_localctx, 4, RULE_fun);
+        int _la;
+        try {
+            enterOuterAlt(_localctx, 1);
+            {
+                setState(50);
+                _la = _input.LA(1);
+                if (!(_la == T__4 || _la == T__5)) {
+                    _errHandler.recoverInline(this);
+                } else {
+                    if (_input.LA(1) == Token.EOF) matchedEOF = true;
+                    _errHandler.reportMatch(this);
+                    consume();
+                }
+                setState(51);
+                match(VARIABLE);
+                setState(52);
+                _la = _input.LA(1);
+                if (!(_la == T__6 || _la == T__7)) {
+                    _errHandler.recoverInline(this);
+                } else {
+                    if (_input.LA(1) == Token.EOF) matchedEOF = true;
+                    _errHandler.reportMatch(this);
+                    consume();
+                }
+                setState(53);
+                expr(0);
+            }
+        } catch (RecognitionException re) {
+            _localctx.exception = re;
+            _errHandler.reportError(this, re);
+            _errHandler.recover(this, re);
+        } finally {
+            exitRule();
+        }
+        return _localctx;
+    }
+
+    public static class SelectContext extends ParserRuleContext {
+        public List<ExprContext> expr() {
+            return getRuleContexts(ExprContext.class);
+        }
+
+        public ExprContext expr(int i) {
+            return getRuleContext(ExprContext.class, i);
+        }
+
+        public SelectContext(ParserRuleContext parent, int invokingState) {
+            super(parent, invokingState);
+        }
+
+        @Override
+        public int getRuleIndex() {
+            return RULE_select;
+        }
+    }
+
+    public final SelectContext select() throws RecognitionException {
+        SelectContext _localctx = new SelectContext(_ctx, getState());
+        enterRule(_localctx, 6, RULE_select);
+        try {
+            enterOuterAlt(_localctx, 1);
+            {
+                setState(55);
+                match(T__8);
+                setState(56);
+                expr(0);
+                setState(57);
+                match(T__9);
+                setState(58);
+                expr(0);
+                setState(59);
+                match(T__10);
+                setState(60);
+                expr(0);
+            }
+        } catch (RecognitionException re) {
+            _localctx.exception = re;
+            _errHandler.reportError(this, re);
+            _errHandler.recover(this, re);
+        } finally {
+            exitRule();
         }
         return _localctx;
     }
@@ -405,17 +505,17 @@ public class JlambdaParser extends Parser {
 
     public final LetContext let() throws RecognitionException {
         LetContext _localctx = new LetContext(_ctx, getState());
-        enterRule(_localctx, 4, RULE_let);
+        enterRule(_localctx, 8, RULE_let);
         try {
             enterOuterAlt(_localctx, 1);
             {
-                setState(48);
-                match(T__8);
-                setState(49);
+                setState(62);
+                match(T__11);
+                setState(63);
                 match(VARIABLE);
-                setState(50);
-                match(T__9);
-                setState(51);
+                setState(64);
+                match(T__12);
+                setState(65);
                 expr(0);
             }
         } catch (RecognitionException re) {
@@ -445,22 +545,25 @@ public class JlambdaParser extends Parser {
     }
 
     public static final String _serializedATN =
-            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\238\4\2\t\2\4\3\t" +
-                    "\3\4\4\t\4\3\2\3\2\5\2\13\n\2\3\2\3\2\7\2\17\n\2\f\2\16\2\22\13\2\3\3" +
-                    "\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5" +
-                    "\3&\n\3\3\3\3\3\6\3*\n\3\r\3\16\3+\7\3.\n\3\f\3\16\3\61\13\3\3\4\3\4\3" +
-                    "\4\3\4\3\4\3\4\2\3\4\5\2\4\6\2\5\3\3\3\3\3\2\5\6\3\2\7\b\2?\2\20\3\2\2" +
-                    "\2\4%\3\2\2\2\6\62\3\2\2\2\b\13\5\6\4\2\t\13\5\4\3\2\n\b\3\2\2\2\n\t\3" +
-                    "\2\2\2\13\f\3\2\2\2\f\r\t\2\2\2\r\17\3\2\2\2\16\n\3\2\2\2\17\22\3\2\2" +
-                    "\2\20\16\3\2\2\2\20\21\3\2\2\2\21\3\3\2\2\2\22\20\3\2\2\2\23\24\b\3\1" +
-                    "\2\24\25\5\6\4\2\25\26\7\4\2\2\26\27\5\4\3\13\27&\3\2\2\2\30\31\t\3\2" +
-                    "\2\31\32\7\21\2\2\32\33\t\4\2\2\33&\5\4\3\n\34&\7\r\2\2\35&\7\16\2\2\36" +
-                    "&\7\17\2\2\37&\7\20\2\2 &\7\21\2\2!\"\7\t\2\2\"#\5\4\3\2#$\7\n\2\2$&\3" +
-                    "\2\2\2%\23\3\2\2\2%\30\3\2\2\2%\34\3\2\2\2%\35\3\2\2\2%\36\3\2\2\2%\37" +
-                    "\3\2\2\2% \3\2\2\2%!\3\2\2\2&/\3\2\2\2\')\f\3\2\2(*\5\4\3\2)(\3\2\2\2" +
-                    "*+\3\2\2\2+)\3\2\2\2+,\3\2\2\2,.\3\2\2\2-\'\3\2\2\2.\61\3\2\2\2/-\3\2" +
-                    "\2\2/\60\3\2\2\2\60\5\3\2\2\2\61/\3\2\2\2\62\63\7\13\2\2\63\64\7\21\2" +
-                    "\2\64\65\7\f\2\2\65\66\5\4\3\2\66\7\3\2\2\2\7\n\20%+/";
+            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\26F\4\2\t\2\4\3\t" +
+                    "\3\4\4\t\4\4\5\t\5\4\6\t\6\3\2\3\2\5\2\17\n\2\3\2\3\2\7\2\23\n\2\f\2\16" +
+                    "\2\26\13\2\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3" +
+                    "\3\3\5\3(\n\3\3\3\3\3\6\3,\n\3\r\3\16\3-\7\3\60\n\3\f\3\16\3\63\13\3\3" +
+                    "\4\3\4\3\4\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\3\6\3\6\3\6" +
+                    "\2\3\4\7\2\4\6\b\n\2\5\3\3\3\3\3\2\7\b\3\2\t\n\2L\2\24\3\2\2\2\4\'\3\2" +
+                    "\2\2\6\64\3\2\2\2\b9\3\2\2\2\n@\3\2\2\2\f\17\5\n\6\2\r\17\5\4\3\2\16\f" +
+                    "\3\2\2\2\16\r\3\2\2\2\17\20\3\2\2\2\20\21\t\2\2\2\21\23\3\2\2\2\22\16" +
+                    "\3\2\2\2\23\26\3\2\2\2\24\22\3\2\2\2\24\25\3\2\2\2\25\3\3\2\2\2\26\24" +
+                    "\3\2\2\2\27\30\b\3\1\2\30\31\5\n\6\2\31\32\7\4\2\2\32\33\5\4\3\f\33(\3" +
+                    "\2\2\2\34(\5\6\4\2\35(\5\b\5\2\36(\7\20\2\2\37(\7\21\2\2 (\7\22\2\2!(" +
+                    "\7\23\2\2\"(\7\24\2\2#$\7\5\2\2$%\5\4\3\2%&\7\6\2\2&(\3\2\2\2\'\27\3\2" +
+                    "\2\2\'\34\3\2\2\2\'\35\3\2\2\2\'\36\3\2\2\2\'\37\3\2\2\2\' \3\2\2\2\'" +
+                    "!\3\2\2\2\'\"\3\2\2\2\'#\3\2\2\2(\61\3\2\2\2)+\f\3\2\2*,\5\4\3\2+*\3\2" +
+                    "\2\2,-\3\2\2\2-+\3\2\2\2-.\3\2\2\2.\60\3\2\2\2/)\3\2\2\2\60\63\3\2\2\2" +
+                    "\61/\3\2\2\2\61\62\3\2\2\2\62\5\3\2\2\2\63\61\3\2\2\2\64\65\t\3\2\2\65" +
+                    "\66\7\24\2\2\66\67\t\4\2\2\678\5\4\3\28\7\3\2\2\29:\7\13\2\2:;\5\4\3\2" +
+                    ";<\7\f\2\2<=\5\4\3\2=>\7\r\2\2>?\5\4\3\2?\t\3\2\2\2@A\7\16\2\2AB\7\24" +
+                    "\2\2BC\7\17\2\2CD\5\4\3\2D\13\3\2\2\2\7\16\24\'-\61";
     public static final ATN _ATN =
             new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 

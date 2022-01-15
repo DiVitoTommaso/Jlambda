@@ -4,7 +4,8 @@ stmt: ((let | expr) (';' | EOF))*;
 
 expr:
      let 'in' expr
-    | ('λ'|'fun') VARIABLE ('.'|'->') expr
+    | fun
+    | select
     | STRING
     | FLOAT
     | INT
@@ -14,6 +15,8 @@ expr:
     | expr expr+
     ;
 
+fun: ('λ'|'fun') VARIABLE ('.'|'->') expr;
+select: 'if' expr 'then' expr 'else' expr;
 let: 'let' VARIABLE '=' expr;
 
 STRING: '"' .*? '"' | '\'' .*? '\'';

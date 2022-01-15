@@ -298,11 +298,11 @@ public class JlambdaInterpreter {
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp) {
                     fvLet(tmp, vars);
-                    result.append("val ").append(let(tmp, env));
+                    result.append("val ").append(let(tmp, env)).append("\n");
                 }
                 if (tree instanceof JlambdaParser.ExprContext tmp) {
                     fvExpr(tmp, vars);
-                    result.append("val - => ").append(expr(tmp, env));
+                    result.append("val - => ").append(expr(tmp, env)).append("\n");
                 }
             }
             return result.toString();

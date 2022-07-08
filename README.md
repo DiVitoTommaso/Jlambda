@@ -50,10 +50,10 @@ The release will let you run a console line interpreter with no possibility to l
 ```
 let f = free # free var #
 let v = fun x.(x); # ok #
-let unbound = fun x.g(x); # error: unbound name g
+let unbound = fun x.g(x); # error: unbound name g #
 let Ω = fun x -> (x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
 let one = 1 in equal(one)(one); # assuming equal is native registered; #
-let higherOrderFun = fun x. (fun y. (x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end
-let res = let one = 1 in v(one) # extend enviroment with 'one' only for this evaluation and the apply 'one' to 'v'
+let higherOrderFun = fun x. (fun y. (x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end #
+let res = let one = 1 in v(one) # extend enviroment with 'one' only for this evaluation and the apply 'one' to 'v' #
 ```
 **PS: Function body must be enclosed between paranteses '()' to avoid ambiguity**

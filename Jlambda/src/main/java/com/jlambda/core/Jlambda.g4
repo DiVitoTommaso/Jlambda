@@ -15,9 +15,9 @@ expr:
     | expr expr+
     ;
 
-fun: ('λ'|'fun') VARIABLE ('.'|'->') expr;
+fun: ('λ'|'fun') VARIABLE ('.'|'->') '(' expr ')';
 select: 'if' expr 'then' expr 'else' expr;
-let: 'let' VARIABLE '=' expr;
+let: 'let' VARIABLE '=' (expr | 'free');
 
 STRING: '"' .*? '"' | '\'' .*? '\'';
 FLOAT: [0-9]+ '.' [0-9]*;

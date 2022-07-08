@@ -14,6 +14,70 @@ public class JlambdaInterpreter {
     private final Set<String> vars = new HashSet<>();
 
     private static abstract class Expression {
+
+        protected String exprToString(JlambdaParser.ExprContext ctx, Map<String, Expression> env, Set<String> vars) {
+            var tmp = new StringBuilder();
+            if (ctx.fun() != null) {
+                vars.add(ctx.fun().VARIABLE().getText());
+                return tmp.append("fun ")
+                        .append(ctx.fun().VARIABLE().getText())
+                        .append(" -> (")
+                        .append(exprToString(ctx.fun().expr(), env, vars))
+                        .append(")").toString();
+            }
+
+            if(ctx.let() != null){
+                vars.add(ctx.let().VARIABLE().getText());
+                return tmp.append("let ")
+                        .append(ctx.let().VARIABLE().getText())
+                        .append(exprToString(ctx.let().expr(), env, vars))
+                        .append(" in ")
+                        .append(exprToString(ctx.let().expr(), env, vars))
+                        .toString();
+            }
+
+            if(ctx.select() != null)
+                return tmp.append(" if ")
+                        .append(exprToString(ctx.select().expr(0), env, vars))
+                        .append(" then ")
+                        .append(exprToString(ctx.select().expr(1), env, vars))
+                        .append(" else ")
+                        .append(exprToString(ctx.select().expr(2), env, vars))
+                        .toString();
+
+            if(ctx.expr().size() == 1)
+                return tmp.append("(").append(exprToString(ctx.expr(0), env, vars)).append(")").toString();
+
+            if(ctx.expr().size() > 1) {
+                for (JlambdaParser.ExprContext e : ctx.expr())
+                    tmp.append("(").append(exprToString(e, env, vars)).append(")");
+                return tmp.toString();
+            }
+
+            if(ctx.VARIABLE() != null){
+                var str = ctx.VARIABLE().getText();
+                if(env.containsKey(str) && !vars.contains(str))
+                    tmp.append(env.get(str));
+                else
+                    tmp.append(str);
+            }
+
+            return ctx.getText();
+        }
+    }
+
+    private static class JLFreeVar extends Expression {
+
+        private final String name;
+
+        public JLFreeVar(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "free " + name;
+        }
     }
 
     private static class JLBool extends Expression {
@@ -116,7 +180,11 @@ public class JlambdaInterpreter {
                 return tmp.v;
             }
 
-
+            if (e instanceof JLFreeVar tmp) {
+                return new Object() {
+                    public final String free = tmp.name;
+                };
+            }
             throw new Error("TypeError: function cannot be converted to native type");
         }
 
@@ -162,7 +230,7 @@ public class JlambdaInterpreter {
 
         @Override
         public String toString() {
-            return "fun " + param + " -> " + body.getText().replaceAll("fun", "fun ").replaceAll("\\.|->", " -> ");
+            return String.format("fun %s -> %s", param,  exprToString(body, funEnv, new HashSet<>()));
         }
     }
 
@@ -179,6 +247,8 @@ public class JlambdaInterpreter {
             return "bool";
         if (e instanceof JLFloat)
             return "float";
+        if (e instanceof JLFreeVar)
+            return "free var";
 
         return "unknown";
     }
@@ -243,16 +313,23 @@ public class JlambdaInterpreter {
                 res = jFun.apply(tmp);
             else if (res instanceof JLFun fun)
                 res = fun.apply(tmp);
-            else
+            else if (res instanceof JLFreeVar var) {
+                res = new JLFreeVar(var.name + "(" + tmp.toString() + ")");
+            } else
                 throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
         }
         return res;
     }
 
     private static String let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
-        Expression res = expr(ctx.expr(), env);
-        env.put(ctx.VARIABLE().getText(), res);
-        return ctx.VARIABLE().getText() + " => " + res.toString();
+        if (ctx.expr() != null) {
+            Expression res = expr(ctx.expr(), env);
+            env.put(ctx.VARIABLE().getText(), res);
+            return ctx.VARIABLE().getText() + " => " + res.toString();
+        } else {
+            env.put(ctx.VARIABLE().getText(), new JLFreeVar(ctx.VARIABLE().getText()));
+            return ctx.VARIABLE().getText() + " => free";
+        }
     }
 
     private static void fvExpr(JlambdaParser.ExprContext ctx, Set<String> vars) {
@@ -288,7 +365,8 @@ public class JlambdaInterpreter {
     }
 
     private static void fvLet(JlambdaParser.LetContext ctx, Set<String> vars) {
-        fvExpr(ctx.expr(), vars);
+        if (ctx.expr() != null)
+            fvExpr(ctx.expr(), vars);
         vars.add(ctx.VARIABLE().getText());
     }
 

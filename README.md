@@ -26,11 +26,13 @@ If you want to run the code and edit:
 6) You can evaluate code using eval method of the interpreter instance (multiple expressions must be separated by ';')
 7) You can reset the environment of the interpreter instance using the method reset
 8) JLBuiltin class contains some useful native method that can be registered to the interpreter 
-9) Evaluation will extend global enviroment associated to the thread who invoked the expression evaluation and it won't reset at the end of the eval method call.
+9) Evaluation will extend global enviroment associated to the interpreter it won't reset at the end of the eval method call automatically.
 10) If an error occur the environment created before the error will remain and an error will be raised
 11) Each interpreter is synchronized. Only one thread at a time can use methods of an interpreter instance
 12) Use ';' to concatenate expressions during eval (Ex. let v1 = 10; let v2 = 20)
 13) The grammar of this language can be found in the same directory of the interpreter class (Jlambda.g4) in ANTLR form
+
+# Or
 If you want to use the interpreter as a library:
 1) You can add the 'release jar' as library
 2) Create an instance of JLambdaInterpreter class
@@ -48,7 +50,7 @@ The release will let you run a console line interpreter with no possibility to l
 ```
 let f = free # free var #
 let v = fun x.(x); # ok #
-let unbound = fun x.g(x); # error: unbound name f
+let unbound = fun x.g(x); # error: unbound name g
 let Ω = fun x -> (x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
 let one = 1 in equal(one)(one); # assuming equal is native registered; #
 let higherOrderFun = fun x. (fun y. (x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end

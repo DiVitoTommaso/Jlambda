@@ -9,14 +9,15 @@ Minimal functional programming language like lambda calculus written in java wit
 7) 'If' statement for expression selection with only boolean guards support
 8) 'Let' support to assign a name to an expression, function or result of a function application
 9) 'Let-in' support to assign a name visible only in the expression which follows 'in' locally (as ocaml)
-10) Vars bounds analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, you get errors for unbound names (variables) during function delaration. (functions declarations with free variable won't evaluate)
-11) Recursion not supported natively. 'Let' and 'Let-in' function declaration can't see their name during declaration. (Consider using 'Y' combinator)
-12) Language is interpreted so evaluation will be slow
-13) Functions declarations and let in create copy of the enviroment to be able to extend them using static scoping, shadowing, and local declarations => memory usage very high
-14) Toy language not for real usage
+10) 'Free vars' support to create free variable in an expr to avoid evaluation returning a 'free expr'
+11) Vars bounds analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, you get errors for unbound names (variables) during function delaration. (functions declarations with free variable won't evaluate)
+12) Recursion not supported natively. 'Let' and 'Let-in' function declaration can't see their name during declaration. (Consider using 'Y' combinator)
+13) Language is interpreted so evaluation will be slow
+14) Functions declarations and let in create copy of the enviroment to be able to extend them using static scoping, shadowing, and local declarations => memory usage very high
+15) Toy language not for real usage
 
 # How To
-
+If you want to run the code and edit:
 1) You can run the project using the Jlambda class in the [main.java.com.jlambda.builtin] directory as a normal maven project.
 2) You can pass a file as argument when you run the Jlambda class as main class and this will evaluate the code of the file and will open a console where you can see errors, well done evaluations of the file and possibility to evaluate manual code at runtime (no reset possible)
 3) Don't edit eval method, register method or env field (hashmap) or interpreter will break
@@ -30,17 +31,27 @@ Minimal functional programming language like lambda calculus written in java wit
 11) Each interpreter is synchronized. Only one thread at a time can use methods of an interpreter instance
 12) Use ';' to concatenate expressions during eval (Ex. let v1 = 10; let v2 = 20)
 13) The grammar of this language can be found in the same directory of the interpreter class (Jlambda.g4) in ANTLR form
+If you want to use the interpreter as a library:
+1) You can add the 'release jar' as library
+2) Create an instance of JLambdaInterpreter class
+3) Use builtin methods of the interpreter to create your enviroment and evaluate your code as a string.
 
 # Libraries requirements
 
 - ANTLR4 for java: https://www.antlr.org/download.html (for jlambda lexer and parser)
 - Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
 
+# Release
+The release will let you run a console line interpreter with no possibility to load java function, but you can still pass a file to evaluate containing Jlambda code as argument to the executable (jar) to build 
+
 # Expression example
 ```
-let v = fun x.x; # ok #
-let unbound = fun x.f(x); # error: unbound name f
-let Ω = fun x -> (x(x)); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
+let f = free # free var #
+let v = fun x.(x); # ok #
+let unbound = fun x.g(x); # error: unbound name f
+let Ω = fun x -> (x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
 let one = 1 in equal(one)(one); # assuming equal is native registered; #
-let higherOrderFun = fun x. fun y. x(y) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end
+let higherOrderFun = fun x. (fun y. (x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end
+let res = let one = 1 in v(one)
 ```
+**PS: Function body need to be enclosed between paranteses '()' to avoid ambiguity**

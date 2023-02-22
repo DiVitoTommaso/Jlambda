@@ -25,12 +25,13 @@ If you want to run the code and edit:
 5) You can register native java methods using the method register of the interpreter instance (method is visible only to that instance)
 6) You can evaluate code using eval method of the interpreter instance (multiple expressions must be separated by ';')
 7) You can reset the environment of the interpreter instance using the method reset
-8) JLBuiltin class contains some useful native method that can be registered to the interpreter 
-9) Evaluation will extend global enviroment associated to the interpreter it won't reset at the end of the eval method call automatically.
-10) If an error occur the environment created before the error will remain and an error will be raised
-11) Each interpreter is synchronized. Only one thread at a time can use methods of an interpreter instance
-12) Use ';' to concatenate expressions during eval (Ex. let v1 = 10; let v2 = 20)
-13) The grammar of this language can be found in the same directory of the interpreter class (Jlambda.g4) in ANTLR form
+8) You can register native java function using register method of JLambdaInterpreter class or using the keyword 'load' telling the location and the signature of the function
+9) JLBuiltin class contains some useful native method that can be registered to the interpreter 
+10) Evaluation will extend global enviroment associated to the interpreter it won't reset at the end of the eval method call automatically.
+11) If an error occur the environment created before the error will remain and an error will be raised
+12) Each interpreter is synchronized. Only one thread at a time can use methods of an interpreter instance
+13) Use ';' to concatenate expressions during eval (Ex. let v1 = 10; let v2 = 20)
+14) The grammar of this language can be found in the same directory of the interpreter class (Jlambda.g4) in ANTLR form
 
 # Or
 If you want to use the interpreter as a library:
@@ -44,7 +45,7 @@ If you want to use the interpreter as a library:
 - Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
 
 # Release
-The release will let you run a console line interpreter with no possibility to load java function, but you can still pass a file to evaluate containing Jlambda code as argument to the executable (jar) to build 
+The release will let you run a console line interpreter with possibility to load native java functions. You can pass a file to evaluate containing Jlambda code as argument to the executable (jar) to build an initial environment
 
 # Expression example
 ```

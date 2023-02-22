@@ -17,6 +17,9 @@ Minimal functional programming language like lambda calculus written in java wit
 15) Toy language not for real usage
 
 # How To
+
+*Basic Usage: write in your console ```java -jar path/to/jlambda.jar ``` replacing "path/to/jlambda.jar" with the absolute path location of the downloaded release file*
+
 If you want to run the code and edit:
 1) You can run the project using the Jlambda class in the [main.java.com.jlambda.builtin] directory as a normal maven project.
 2) You can pass a file as argument when you run the Jlambda class as main class and this will evaluate the code of the file and will open a console where you can see errors, well done evaluations of the file and possibility to evaluate manual code at runtime (no reset possible)

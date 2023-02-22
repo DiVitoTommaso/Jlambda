@@ -3,6 +3,8 @@ package com.jlambda.builtin;
 import com.jlambda.core.JlambdaInterpreter;
 
 import java.io.FileInputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 class Jlambda {
@@ -21,24 +23,24 @@ class Jlambda {
 
                 interpreter.eval(tmp.toString());
             } catch (Exception e) {
-                System.err.println("FileError: file not found at path: " + args[0]);
+                System.out.println("\033[0;31mFileError: file not found at path: " + args[0]);
                 System.exit(-1);
             } catch (Error e) {
-                System.err.println(e.getMessage());
+                System.out.println("\033[0;31m" + e.getMessage());
             }
 
         }
 
-        System.out.print(">> ");
+        System.out.print("\033[0m>> ");
         while (true)
             try {
-                System.out.println(interpreter.eval(scanner.nextLine()));
-                System.out.print(">> ");
+                System.out.print(interpreter.eval(scanner.nextLine()));
+                System.out.print("\033[0m>> ");
             } catch (Error e) {
-                System.err.println(e.getMessage());
-                System.out.print(">> ");
+                System.out.println("\033[0;31m" + e.getMessage());
+                System.out.print("\033[0m>> ");
             } catch (Exception ignored) {
-                System.out.print(">> ");
+                System.out.print("\033[0m>> ");
             }
 
     }

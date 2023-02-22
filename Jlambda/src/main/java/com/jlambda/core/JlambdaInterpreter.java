@@ -12,9 +12,8 @@ public class JlambdaInterpreter {
 
     private final Map<String, Expression> env = new HashMap<>();
     private final Set<String> vars = new HashSet<>();
-
+    private boolean load = true;
     private static abstract class Expression {
-
         protected String exprToString(JlambdaParser.ExprContext ctx, Map<String, Expression> env, Set<String> vars) {
             var tmp = new StringBuilder();
             if (ctx.fun() != null) {
@@ -26,7 +25,7 @@ public class JlambdaInterpreter {
                         .append(")").toString();
             }
 
-            if(ctx.let() != null){
+            if (ctx.let() != null) {
                 vars.add(ctx.let().VARIABLE().getText());
                 return tmp.append("let ")
                         .append(ctx.let().VARIABLE().getText())
@@ -36,7 +35,7 @@ public class JlambdaInterpreter {
                         .toString();
             }
 
-            if(ctx.select() != null)
+            if (ctx.select() != null)
                 return tmp.append(" if ")
                         .append(exprToString(ctx.select().expr(0), env, vars))
                         .append(" then ")
@@ -45,22 +44,59 @@ public class JlambdaInterpreter {
                         .append(exprToString(ctx.select().expr(2), env, vars))
                         .toString();
 
-            if(ctx.expr().size() == 1)
-                return tmp.append("(").append(exprToString(ctx.expr(0), env, vars)).append(")").toString();
+            if (ctx.expr() != null)
+                return tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")").toString();
 
-            if(ctx.expr().size() > 1) {
-                for (JlambdaParser.ExprContext e : ctx.expr())
-                    tmp.append("(").append(exprToString(e, env, vars)).append(")");
+            if (ctx.subexpr() != null) {
+                tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")");
+                for (JlambdaParser.SubexprContext e : ctx.subexpr())
+                    tmp.append("(").append(subExprToString(e, env, vars)).append(")");
                 return tmp.toString();
             }
 
-            if(ctx.VARIABLE() != null){
+            if (ctx.VARIABLE() != null) {
                 var str = ctx.VARIABLE().getText();
-                if(env.containsKey(str) && !vars.contains(str))
+                if (env.containsKey(str) && !vars.contains(str))
                     tmp.append(env.get(str));
                 else
                     tmp.append(str);
             }
+
+            return ctx.getText();
+        }
+
+        protected String subExprToString(JlambdaParser.SubexprContext ctx, Map<String, Expression> env, Set<String> vars) {
+            var tmp = new StringBuilder();
+            if (ctx.fun() != null) {
+                vars.add(ctx.fun().VARIABLE().getText());
+                return tmp.append("fun ")
+                        .append(ctx.fun().VARIABLE().getText())
+                        .append(" -> (")
+                        .append(exprToString(ctx.fun().expr(), env, vars))
+                        .append(")").toString();
+            }
+
+            if (ctx.let() != null) {
+                vars.add(ctx.let().VARIABLE().getText());
+                return tmp.append("let ")
+                        .append(ctx.let().VARIABLE().getText())
+                        .append(exprToString(ctx.let().expr(), env, vars))
+                        .append(" in ")
+                        .append(exprToString(ctx.let().expr(), env, vars))
+                        .toString();
+            }
+
+            if (ctx.select() != null)
+                return tmp.append(" if ")
+                        .append(exprToString(ctx.select().expr(0), env, vars))
+                        .append(" then ")
+                        .append(exprToString(ctx.select().expr(1), env, vars))
+                        .append(" else ")
+                        .append(exprToString(ctx.select().expr(2), env, vars))
+                        .toString();
+
+            if (ctx.expr() != null)
+                tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")").toString();
 
             return ctx.getText();
         }
@@ -230,7 +266,7 @@ public class JlambdaInterpreter {
 
         @Override
         public String toString() {
-            return String.format("fun %s -> %s", param,  exprToString(body, funEnv, new HashSet<>()));
+            return String.format("fun %s -> %s", param, exprToString(body, funEnv, new HashSet<>()));
         }
     }
 
@@ -255,7 +291,83 @@ public class JlambdaInterpreter {
 
     private static Expression expr(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
         // values
-        if (ctx.expr().size() == 0) {
+        if (ctx.expr() == null) {
+            // int
+            if (ctx.INT() != null)
+                return new JLInt(Integer.parseInt(ctx.INT().getText()));
+
+            // float
+            if (ctx.FLOAT() != null)
+                return new JLFloat(Double.parseDouble(ctx.FLOAT().getText()));
+
+            // bool
+            if (ctx.BOOL() != null)
+                return new JLBool(Boolean.parseBoolean(ctx.BOOL().getText()));
+
+            // string
+            if (ctx.STRING() != null)
+                return new JLString(ctx.STRING().getText().substring(1, ctx.STRING().getText().length() - 1));
+
+            // var
+            if (ctx.VARIABLE() != null)
+                return env.get(ctx.VARIABLE().getText());
+
+        }
+
+        // load declaration
+        if (ctx.load() != null) {
+            HashMap<String, Expression> newEnv = new HashMap<>(env);
+            return load(ctx.load(), newEnv);
+        }
+
+        // local declaration
+        if (ctx.let() != null) {
+            HashMap<String, Expression> newEnv = new HashMap<>(env);
+            let(ctx.let(), newEnv);
+            return expr(ctx.expr(), newEnv);
+        }
+
+        // function declaration
+        if (ctx.fun() != null)
+            return new JLFun(ctx.fun().VARIABLE().getText(), ctx.fun().expr(), env);
+
+        // if statement
+        if (ctx.select() != null) {
+            Expression result = expr(ctx.select().expr(0), env);
+            if (!(result instanceof JLBool tmp))
+                throw new Error("TypeError: non boolean if guard");
+
+            if (tmp.v)
+                return expr(ctx.select().expr(1), env);
+            else
+                return expr(ctx.select().expr(2), env);
+        }
+
+        // expr between parentheses
+        if (ctx.expr() != null)
+            return expr(ctx.expr(), env);
+
+        // apply => first function, second and other can be functions or values
+        Expression res = subExpr(ctx.subexpr(0), env);
+
+        for (int i = 1; i < ctx.subexpr().size(); i++) {
+            Expression tmp = subExpr(ctx.subexpr(i), env);
+
+            if (res instanceof JavaFunction jFun)
+                res = jFun.apply(tmp);
+            else if (res instanceof JLFun fun)
+                res = fun.apply(tmp);
+            else if (res instanceof JLFreeVar var) {
+                res = new JLFreeVar(var.name + "(" + tmp.toString() + ")");
+            } else
+                throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
+        }
+        return res;
+    }
+
+    private static Expression subExpr(JlambdaParser.SubexprContext ctx, Map<String, Expression> env) {
+        // values
+        if (ctx.expr() == null) {
             // int
             if (ctx.INT() != null)
                 return new JLInt(Integer.parseInt(ctx.INT().getText()));
@@ -276,11 +388,18 @@ public class JlambdaInterpreter {
             if (ctx.VARIABLE() != null)
                 return env.get(ctx.VARIABLE().getText());
         }
+
+        // load declaration
+        if (ctx.load() != null) {
+            HashMap<String, Expression> newEnv = new HashMap<>(env);
+            return load(ctx.load(), newEnv);
+        }
+
         // local declaration
         if (ctx.let() != null) {
             HashMap<String, Expression> newEnv = new HashMap<>(env);
             let(ctx.let(), newEnv);
-            return expr(ctx.expr(0), newEnv);
+            return expr(ctx.expr(), newEnv);
         }
 
         // function declaration
@@ -300,25 +419,87 @@ public class JlambdaInterpreter {
         }
 
         // expr between parentheses
-        if (ctx.expr().size() == 1)
-            return expr(ctx.expr(0), env);
+        if (ctx.expr() != null)
+            return expr(ctx.expr(), env);
 
-        // apply => first function, second and other can be functions or values
-        Expression res = expr(ctx.expr(0), env);
+        throw new Error("TypeError: -");
+    }
 
-        for (int i = 1; i < ctx.expr().size(); i++) {
-            Expression tmp = expr(ctx.expr(i), env);
+    private static JavaFunction load(JlambdaParser.LoadContext load, HashMap<String, Expression> newEnv) {
+        StringBuilder tmp = new StringBuilder();
+        ArrayList<String> params = new ArrayList<>();
+        StringBuilder ret = new StringBuilder();
 
-            if (res instanceof JavaFunction jFun)
-                res = jFun.apply(tmp);
-            else if (res instanceof JLFun fun)
-                res = fun.apply(tmp);
-            else if (res instanceof JLFreeVar var) {
-                res = new JLFreeVar(var.name + "(" + tmp.toString() + ")");
-            } else
-                throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
+        for (ParseTree v : load.children) {
+            if (v.getText().equals("load"))
+                continue;
+
+            if (v.getText().equals(".")) {
+                tmp.append(".");
+                continue;
+            }
+
+            if (v.getText().equals("signat"))
+                break;
+
+            tmp.append(v.getText());
         }
-        return res;
+
+        boolean next = false;
+        boolean interrupt = false;
+
+        for (ParseTree v : load.children) {
+            if (v.getText().equals("signat")) {
+                next = true;
+                continue;
+            }
+
+            if (!v.getText().equals("signat") && !next)
+                continue;
+
+            if (v.getText().equals("(") || v.getText().equals(")") || v.getText().equals(","))
+                continue;
+
+            if (interrupt) {
+                ret.append(v.getText());
+                break;
+            }
+
+            if (v.getText().equals("=>")) {
+                interrupt = true;
+                continue;
+            }
+
+            params.add(v.getText());
+        }
+
+
+        String method = tmp.substring(tmp.lastIndexOf(".") + 1);
+        tmp.delete(tmp.lastIndexOf("."), tmp.length());
+
+        try {
+            Class<?> clz = Class.forName(tmp.toString());
+            List<Method> ms = Arrays.stream(clz.getMethods()).filter(e -> e.getName().equals(method)).toList();
+            for (Method m : ms) {
+                boolean valid = true;
+
+                if (params.size() == m.getParameterCount()) {
+                    for (int i = 0; i < m.getParameterCount(); i++)
+                        if (!m.getParameterTypes()[i].getSimpleName().equals(params.get(i))) {
+                            valid = false;
+                            break;
+                        }
+                    if (!m.getReturnType().getName().equals(ret.toString()))
+                        valid = false;
+
+                    if (valid)
+                        return new JavaFunction(m);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        throw new Error("NativeError: No method not found with the given signature.");
     }
 
     private static String let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
@@ -349,7 +530,7 @@ public class JlambdaInterpreter {
         if (ctx.let() != null) {
             HashSet<String> newEnv = new HashSet<>(vars);
             fvLet(ctx.let(), newEnv);
-            fvExpr(ctx.expr(0), newEnv);
+            fvExpr(ctx.expr(), newEnv);
             return;
         }
 
@@ -359,9 +540,36 @@ public class JlambdaInterpreter {
             return;
         }
 
-        for (JlambdaParser.ExprContext c : ctx.expr())
-            fvExpr(c, vars);
+        for (JlambdaParser.SubexprContext c : ctx.subexpr())
+            fvSubExpr(c, vars);
 
+    }
+
+    private static void fvSubExpr(JlambdaParser.SubexprContext ctx, Set<String> vars) {
+        if (ctx.select() != null) {
+            for (JlambdaParser.ExprContext c : ctx.select().expr())
+                fvExpr(c, vars);
+            return;
+        }
+
+        if (ctx.fun() != null) {
+            HashSet<String> newEnv = new HashSet<>(vars);
+            newEnv.add(ctx.fun().VARIABLE().getText());
+            fvExpr(ctx.fun().expr(), newEnv);
+            return;
+        }
+
+        if (ctx.let() != null) {
+            HashSet<String> newEnv = new HashSet<>(vars);
+            fvLet(ctx.let(), newEnv);
+            fvExpr(ctx.expr(), newEnv);
+            return;
+        }
+
+        if (ctx.VARIABLE() != null) {
+            if (!vars.contains(ctx.VARIABLE().getText()))
+                throw new Error("NameError: Unbound name: " + ctx.VARIABLE().getText());
+        }
     }
 
     private static void fvLet(JlambdaParser.LetContext ctx, Set<String> vars) {
@@ -376,10 +584,16 @@ public class JlambdaInterpreter {
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp) {
                     fvLet(tmp, vars);
+                    if(!load && tmp.expr().load() != null)
+                        throw new Error("LoaderError: The native loader is disabled for this interpreter");
+
                     result.append("val ").append(let(tmp, env)).append("\n");
                 }
                 if (tree instanceof JlambdaParser.ExprContext tmp) {
                     fvExpr(tmp, vars);
+                    if(!load && tmp.load() != null)
+                        throw new Error("LoaderError: The native loader is disabled for this interpreter");
+
                     result.append("val - => ").append(expr(tmp, env)).append("\n");
                 }
             }
@@ -419,5 +633,9 @@ public class JlambdaInterpreter {
     public synchronized String register(String var, Method m) {
         env.put(var, new JlambdaInterpreter.JavaFunction(m));
         return "val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount());
+    }
+
+    public synchronized void allowLoad(boolean allow) {
+        load = allow;
     }
 }

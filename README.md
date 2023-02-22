@@ -57,7 +57,7 @@ let v = fun x.(x); # ok #
 let unbound = fun x.g(x); # error: unbound name g #
 let Ω = fun x.(x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
 let higherOrderFun = fun x.(fun y.(x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end #
-let equal = load java.util.Objects.equals signat (Object,Object)=>boolean; # register native java funzione #
+let equal = load java.util.Objects.equals(Object,Object):boolean; # register native java function #
 let res = let one = 1 in equal(one)(one); # check equality using native java function #
 let five1 = higherOrderFun fun x.(x) 5; # invocation can be done without parentesis #
 let five2 = higherOrderFun(fun x.(x))(5); # or with parenteses, but if you use parenteses each invocation must have only 1 parameter #

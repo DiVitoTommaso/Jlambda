@@ -51,12 +51,12 @@ The release will let you run a console line interpreter with no possibility to l
 let f = free # free var #
 let v = fun x.(x); # ok #
 let unbound = fun x.g(x); # error: unbound name g #
-let Ω = fun x -> (x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
-let equal = load java.util.Objects.equals signat (Object,Object)=>boolean;
-let res = let one = 1 in equal(one)(one);
-let higherOrderFun = fun x. (fun y. (x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end #
-let five1 = higherOrderFun fun x. (x) 5;
-let five2 = higherOrderFun(fun x. (x))(5);
+let Ω = fun x.(x x); #  Ω(Ω) infinite application will print an error and will go to evaluate the next expression #
+let higherOrderFun = fun x.(fun y.(x y)) # use ; to evaluate multiple expression, but last expression doesn't need ';' at the end #
+let equal = load java.util.Objects.equals signat (Object,Object)=>boolean; # register native java funzione #
+let res = let one = 1 in equal(one)(one); # check equality using native java function #
+let five1 = higherOrderFun fun x.(x) 5; # invocation can be done without parentesis #
+let five2 = higherOrderFun(fun x.(x))(5); # or with parenteses, but if you use parenteses each invocation must have only 1 parameter #
 let res = let one = 1 in v(one) # extend enviroment with 'one' only for this evaluation and the apply 'one' to 'v' #
 ```
 **Note: Function body must be enclosed between paranteses '()' to avoid ambiguity**

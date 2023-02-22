@@ -12,7 +12,7 @@ expr:
     | INT
     | BOOL
     | VARIABLE
-    | '(' expr ')'
+    | '(' expr? ')'
     | subexpr+
     ;
 
@@ -26,13 +26,13 @@ subexpr:
     | INT
     | BOOL
     | VARIABLE
-    | '(' expr ')'
+    | '(' expr? ')'
     ;
 
 fun: ('λ'|'fun') VARIABLE ('.'|'->') '(' expr ')';
 select: 'if' expr 'then' expr 'else' expr;
 let: 'let' VARIABLE '=' (expr | 'free');
-load: 'load' VARIABLE ('.' VARIABLE)* 'signat' '(' VARIABLE (',' VARIABLE)* ')' '=>' VARIABLE;
+load: 'load' VARIABLE ('.' VARIABLE)* '(' VARIABLE? (',' VARIABLE)* ')' ':' VARIABLE;
 
 STRING: '"' .*? '"' | '\'' .*? '\'';
 FLOAT: [0-9]+ '.' [0-9]*;

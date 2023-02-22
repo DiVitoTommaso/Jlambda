@@ -1,7 +1,8 @@
 package com.jlambda.core;
 
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.lang.reflect.Method;
@@ -13,6 +14,7 @@ public class JlambdaInterpreter {
     private final Map<String, Expression> env = new HashMap<>();
     private final Set<String> vars = new HashSet<>();
     private boolean load = true;
+
     private static abstract class Expression {
         protected String exprToString(JlambdaParser.ExprContext ctx, Map<String, Expression> env, Set<String> vars) {
             var tmp = new StringBuilder();
@@ -46,6 +48,9 @@ public class JlambdaInterpreter {
 
             if (ctx.expr() != null)
                 return tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")").toString();
+
+            if (ctx.children.get(0).getText().equals("("))
+                return tmp.append("()").toString();
 
             if (ctx.subexpr() != null) {
                 tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")");
@@ -96,7 +101,10 @@ public class JlambdaInterpreter {
                         .toString();
 
             if (ctx.expr() != null)
-                tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")").toString();
+                return tmp.append("(").append(exprToString(ctx.expr(), env, vars)).append(")").toString();
+
+            if (ctx.children.get(0).getText().equals("("))
+                return tmp.append("()").toString();
 
             return ctx.getText();
         }
@@ -143,6 +151,12 @@ public class JlambdaInterpreter {
         }
     }
 
+    private static class JLVoid extends Expression {
+        public String toString() {
+            return '"' + "nothing" + '"';
+        }
+    }
+
     private static class JLString extends Expression {
         private final String v;
 
@@ -174,12 +188,15 @@ public class JlambdaInterpreter {
         private final List<Object> args = new ArrayList<>();
 
         public JavaFunction(Method m) {
-            if (m == null || m.getParameterCount() == 0 || !Modifier.isStatic(m.getModifiers()))
+            if (m == null || !Modifier.isStatic(m.getModifiers()))
                 throw new Error("NativeError: method must have at least 1 parameter, must be non null and static");
             method = m;
         }
 
         private static Expression jValueOf(Object o) {
+            if (o == null)
+                return new JLVoid();
+
             if (o instanceof Integer tmp)
                 return new JLInt(tmp);
 
@@ -195,12 +212,13 @@ public class JlambdaInterpreter {
                 return new JLFloat(tmp);
             }
 
-
             throw new Error("TypeError: unsupported native type: " + o.getClass().getSimpleName());
-
         }
 
         private static Object lambdaValueOf(Expression e) {
+            if (e instanceof JLVoid)
+                return null;
+
             if (e instanceof JLInt tmp)
                 return tmp.v;
 
@@ -227,7 +245,8 @@ public class JlambdaInterpreter {
         public Expression apply(Expression e) {
             JavaFunction neww = new JavaFunction(method);
             neww.args.addAll(args);
-            neww.args.add(lambdaValueOf(e));
+            if (e != null)
+                neww.args.add(lambdaValueOf(e));
 
             if (neww.args.size() == neww.method.getParameterCount()) {
                 try {
@@ -271,6 +290,8 @@ public class JlambdaInterpreter {
     }
 
     private static String typeof(Expression e) {
+        if (e instanceof JLVoid)
+            return "nothing";
         if (e instanceof JLFun)
             return "function";
         if (e instanceof JavaFunction)
@@ -347,6 +368,9 @@ public class JlambdaInterpreter {
         if (ctx.expr() != null)
             return expr(ctx.expr(), env);
 
+        if (ctx.children.get(0).getText().equals("("))
+            return new JLVoid();
+
         // apply => first function, second and other can be functions or values
         Expression res = subExpr(ctx.subexpr(0), env);
 
@@ -422,7 +446,10 @@ public class JlambdaInterpreter {
         if (ctx.expr() != null)
             return expr(ctx.expr(), env);
 
-        throw new Error("TypeError: -");
+        if (ctx.children.get(0).getText().equals("("))
+            return new JLVoid();
+
+        throw new Error("FatalError: Expression not recognized");
     }
 
     private static JavaFunction load(JlambdaParser.LoadContext load, HashMap<String, Expression> newEnv) {
@@ -439,7 +466,7 @@ public class JlambdaInterpreter {
                 continue;
             }
 
-            if (v.getText().equals("signat"))
+            if (v.getText().equals("("))
                 break;
 
             tmp.append(v.getText());
@@ -449,15 +476,12 @@ public class JlambdaInterpreter {
         boolean interrupt = false;
 
         for (ParseTree v : load.children) {
-            if (v.getText().equals("signat")) {
+            if (v.getText().equals("(") || v.getText().equals(")") || v.getText().equals(",")) {
                 next = true;
                 continue;
             }
 
-            if (!v.getText().equals("signat") && !next)
-                continue;
-
-            if (v.getText().equals("(") || v.getText().equals(")") || v.getText().equals(","))
+            if (!next)
                 continue;
 
             if (interrupt) {
@@ -465,7 +489,7 @@ public class JlambdaInterpreter {
                 break;
             }
 
-            if (v.getText().equals("=>")) {
+            if (v.getText().equals(":")) {
                 interrupt = true;
                 continue;
             }
@@ -489,7 +513,8 @@ public class JlambdaInterpreter {
                             valid = false;
                             break;
                         }
-                    if (!m.getReturnType().getName().equals(ret.toString()))
+
+                    if (!m.getReturnType().getSimpleName().equals(ret.toString()))
                         valid = false;
 
                     if (valid)
@@ -584,14 +609,14 @@ public class JlambdaInterpreter {
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp) {
                     fvLet(tmp, vars);
-                    if(!load && tmp.expr().load() != null)
+                    if (!load && tmp.expr().load() != null)
                         throw new Error("LoaderError: The native loader is disabled for this interpreter");
 
                     result.append("val ").append(let(tmp, env)).append("\n");
                 }
                 if (tree instanceof JlambdaParser.ExprContext tmp) {
                     fvExpr(tmp, vars);
-                    if(!load && tmp.load() != null)
+                    if (!load && tmp.load() != null)
                         throw new Error("LoaderError: The native loader is disabled for this interpreter");
 
                     result.append("val - => ").append(expr(tmp, env)).append("\n");
@@ -613,6 +638,50 @@ public class JlambdaInterpreter {
     public synchronized String eval(String code) {
         JlambdaLexer lexer = new JlambdaLexer(CharStreams.fromString(code));
         JlambdaParser parser = new JlambdaParser(new CommonTokenStream(lexer));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(new ANTLRErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
+                System.out.printf("\033[0;31mSyntaxError: Unrecognized token at: [%s,%s]. %s\n", i, i1, s);
+            }
+
+            @Override
+            public void reportAmbiguity(Parser parser, DFA dfa, int i, int i1, boolean b, BitSet bitSet, ATNConfigSet atnConfigSet) {
+
+            }
+
+            @Override
+            public void reportAttemptingFullContext(Parser parser, DFA dfa, int i, int i1, BitSet bitSet, ATNConfigSet atnConfigSet) {
+
+            }
+
+            @Override
+            public void reportContextSensitivity(Parser parser, DFA dfa, int i, int i1, int i2, ATNConfigSet atnConfigSet) {
+
+            }
+        });
+        parser.removeErrorListeners();
+        parser.addErrorListener(new ANTLRErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
+                System.out.printf("\033[0;31mSyntaxError: Unrecognized syntax at: [%s,%s]. %s\n", i, i1, s);
+            }
+
+            @Override
+            public void reportAmbiguity(Parser parser, DFA dfa, int i, int i1, boolean b, BitSet bitSet, ATNConfigSet atnConfigSet) {
+
+            }
+
+            @Override
+            public void reportAttemptingFullContext(Parser parser, DFA dfa, int i, int i1, BitSet bitSet, ATNConfigSet atnConfigSet) {
+
+            }
+
+            @Override
+            public void reportContextSensitivity(Parser parser, DFA dfa, int i, int i1, int i2, ATNConfigSet atnConfigSet) {
+
+            }
+        });
         return stmt(parser.stmt());
     }
 

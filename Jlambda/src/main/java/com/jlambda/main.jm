@@ -1,0 +1,7 @@
+let outln = load com.jlambda.builtin.JLMethods.println(String):void;
+let out = load com.jlambda.builtin.JLMethods.print(String):void;
+let tan = load java.lang.Math.tan signat (double)=>double;
+
+outln("Hello, World!");
+out("The tangent of 5 is: ");
+out(tan(5));

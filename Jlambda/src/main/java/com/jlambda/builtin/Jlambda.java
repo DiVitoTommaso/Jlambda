@@ -28,7 +28,6 @@ class Jlambda {
             } catch (Error e) {
                 System.out.println("\033[0;31m" + e.getMessage());
             }
-
         }
 
         System.out.print("\033[0m>> ");

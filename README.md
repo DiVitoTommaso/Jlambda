@@ -66,6 +66,10 @@ let res = let one = 1 in v(one) # extend enviroment with 'one' only for this eva
 
 # Factorial in Lambda calculus
 ```
+let mul = load com.jlambda.builtin.Builtin.mul(int,int):int;
+let sub = load com.jlambda.builtin.Builtin.sub(int,int):int;
+let eq = load com.jlambda.builtin.Builtin.equals(Object, Object):boolean;
+
 let Y = fun f.(fun x.(x x)(fun x.(f(fun y.(x(x)(y)))))); # Y combinator to emulate recursion #
 let fact = fun f.(fun x.(if eq(x)(1) then 1 else mul(x)(f(sub(x)(1))))); # Factorial function definition without recursion support #
 Y(fact)(10); # evaluate factorial of 10. This will print: **val - => 3628800**  #

@@ -2,19 +2,7 @@ grammar Jlambda;
 
 stmt: ((let | expr) (';' | EOF))*;
 
-expr:
-     let 'in' expr
-    | fun
-    | select
-    | load
-    | STRING
-    | FLOAT
-    | INT
-    | BOOL
-    | VARIABLE
-    | '(' expr? ')'
-    | subexpr+
-    ;
+expr: subexpr+;
 
 subexpr:
     let 'in' expr

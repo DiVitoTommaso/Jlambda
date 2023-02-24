@@ -69,5 +69,6 @@ let res = let one = 1 in v(one) # extend enviroment with 'one' only for this eva
 let Y = fun f.(fun x.(x x)(fun x.(f(fun y.(x(x)(y)))))); # Y combinator to emulate recursion #
 let fact = fun f.(fun x.(if eq(x)(1) then 1 else mul(x)(f(sub(x)(1))))); # Factorial function definition without recursion support #
 Y(fact)(10); # evaluate factorial of 10. This will print: **val - => 3628800**  #
+Y fact 10; # Same as above without parenteses. parenteses are needed to give evaluation order and are needed for native functions with no args #
 ```
 **Note: Function body must be enclosed between paranteses '()' to avoid ambiguity**

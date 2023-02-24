@@ -13,7 +13,7 @@ Minimal functional programming language like lambda calculus written in java wit
 11) Vars bounds analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, you get errors for unbound names (variables) during function delaration. (functions declarations with free variable won't evaluate)
 12) Recursion not supported natively. 'Let' and 'Let-in' function declaration can't see their name during declaration. (Consider using 'Y' combinator)
 13) Language is interpreted so evaluation will be slow
-14) Functions declarations and let in create copy of the enviroment to be able to extend them using static scoping, shadowing, and local declarations => memory usage very high
+14) Functions declarations and let in extends the enviroment using maps and redirections for searching for a variable (Evaluation will slow down increasing the number of inner scopes)
 15) Toy language not for real usage
 
 # How To
@@ -62,5 +62,12 @@ let res = let one = 1 in equal(one)(one); # check equality using native java fun
 let five1 = higherOrderFun fun x.(x) 5; # invocation can be done without parentesis #
 let five2 = higherOrderFun(fun x.(x))(5); # or with parenteses, but if you use parenteses each invocation must have only 1 parameter #
 let res = let one = 1 in v(one) # extend enviroment with 'one' only for this evaluation and the apply 'one' to 'v' #
+```
+
+# Factorial in Lambda calculus
+```
+let Y = fun f.(fun x.(x x)(fun x.(f(fun y.(x(x)(y)))))); # Y combinator to emulate recursion #
+let fact = fun f.(fun x.(if eq(x)(1) then 1 else mul(x)(f(sub(x)(1))))); # Factorial function definition without recursion support #
+Y(fact)(10); # evaluate factorial of 10. This will print: **val - => 3628800**  #
 ```
 **Note: Function body must be enclosed between paranteses '()' to avoid ambiguity**

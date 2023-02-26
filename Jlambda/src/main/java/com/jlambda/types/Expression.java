@@ -20,8 +20,9 @@ public abstract class Expression {
             env.put(ctx.fun().VARIABLE().getText(), null);
             return tmp.append("fun ")
                     .append(ctx.fun().VARIABLE().getText())
-                    .append(" -> ")
+                    .append(" -> (")
                     .append(exprToString(ctx.fun().expr(), env))
+                    .append(") ")
                     .toString();
         }
 

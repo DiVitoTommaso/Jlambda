@@ -19,7 +19,7 @@ public class ExtensorsEnv extends HashMap<String, Expression> {
 
     @Override
     public Expression get(Object key) {
-        if(super.get(key) != null)
+        if(super.containsKey(key))
             return super.get(key);
 
         if(parent != null)

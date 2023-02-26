@@ -51,10 +51,12 @@ public class JlambdaInterpreter {
         else
             res = new ExpressionLazy(this, ctx.subexpr(0), env);
 
-        String v1 = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env) +
-                "\033[0m To => \033[0;32m" + res.toString() + "\033[0m";
-        if (steps && !last.equals(v1))
-            System.out.println(last = v1);
+        if (res instanceof ExpressionLazy || res instanceof JavaFunction || res instanceof JLFun) {
+            String v1 = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env) +
+                    "\033[0m To => \033[0;32m" + res + "\033[0m =>";
+            if (steps && !last.equals(v1))
+                System.out.println(last = v1);
+        }
 
         for (int i = 1; i < ctx.subexpr().size(); i++) {
             Expression tmp;
@@ -63,15 +65,14 @@ public class JlambdaInterpreter {
             else
                 tmp = new ExpressionLazy(this, ctx.subexpr(i), env);
 
-            String v2 = "\033[0mEval Arg => \033[0;33m" + Expression.subExprToString(ctx.subexpr(i), env) +
-                    "\033[0m To => \033[0;32m" + tmp.toString() + "\033[0m";
-            if (!byName && steps && !last.equals(v2))
-                System.out.println(last = v2);
-
             while (res instanceof ExpressionLazy lazy)
                 res = lazy.eval();
 
             Expression old = res;
+
+            String v3 = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" + res + "\033[0m =>";
+            if (steps && !last.equals(v3))
+                System.out.println(last = v3);
 
             if (res instanceof JavaFunction jFun)
                 res = jFun.apply(tmp);
@@ -82,10 +83,8 @@ public class JlambdaInterpreter {
             } else
                 throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
 
-            String v3 = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" +
-                    old + "\033[0m Obtaining => \033[0;32m" + res + "\033[0m";
             if (steps && !last.equals(v3))
-                System.out.println(last = v3);
+                System.out.println("\033[0mObtaining => \033[0;32m" + res + "\033[0m => From => \033[0;36m" + old + "\033[0m => ");
 
         }
         return res;

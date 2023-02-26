@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JavaFunction extends Expression {
     public final Method method;
@@ -72,15 +73,15 @@ public class JavaFunction extends Expression {
         JavaFunction neww = new JavaFunction(method);
         neww.args.addAll(args);
         if (e != null)
-            neww.args.add(lambdaValueOf(e));
+            neww.args.add(e);
 
         if (neww.args.size() == neww.method.getParameterCount()) {
             try {
                 return jValueOf(neww.method.invoke(null, Arrays.stream(neww.args.toArray()).map(el -> {
                     while (el instanceof ExpressionLazy tmp)
                         el = tmp.eval();
-                    return el;
-                })));
+                    return lambdaValueOf((Expression) el);
+                }).toList().toArray()));
             } catch (Exception ex) {
                 throw new Error("NativeError: method invocation raised " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
             }

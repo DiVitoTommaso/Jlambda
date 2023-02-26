@@ -77,10 +77,9 @@ public class JavaFunction extends Expression {
         if (neww.args.size() == neww.method.getParameterCount()) {
             try {
                 return jValueOf(neww.method.invoke(null, Arrays.stream(neww.args.toArray()).map(el -> {
-                    if (el instanceof ExpressionLazy tmp)
-                        return tmp.eval();
-                    else
-                        return el;
+                    while (el instanceof ExpressionLazy tmp)
+                        el = tmp.eval();
+                    return el;
                 })));
             } catch (Exception ex) {
                 throw new Error("NativeError: method invocation raised " + ex.getClass().getSimpleName() + ": " + ex.getMessage());

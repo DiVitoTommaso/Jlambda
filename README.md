@@ -10,6 +10,8 @@ Minimal functional programming language like lambda calculus written in java wit
 8) 'Let' support to assign a name to an expression, function or result of a function application
 9) 'Let-in' support to assign a name visible only in the expression which follows 'in' locally (as ocaml)
 10) 'Free vars' support to create free variable in an expr to avoid evaluation returning a 'free expr'
+11) 'Call by name' and 'Call by value' function support using ``` f(x) | by name ``` or ``` f(x) | by value ``` 
+12) 'Step-By-Step' support for expression evaluation with details using ``` f(x) | by name with steps ``` or ``` f(x) | by value with steps ```
 11) Vars bounds analysis (language uses static scoping so the enviroment for the function will be the enviroment available at declaration, you get errors for unbound names (variables) during function delaration. (functions declarations with free variable won't evaluate)
 12) Recursion not supported natively. 'Let' and 'Let-in' function declaration can't see their name during declaration. (Consider using 'Y' combinator)
 13) Language is interpreted so evaluation will be slow
@@ -62,6 +64,9 @@ let res = let one = 1 in equal(one)(one); # check equality using native java fun
 let five1 = higherOrderFun fun x.(x) 5; # invocation can be done without parentesis #
 let five2 = higherOrderFun(fun x.(x))(5); # or with parenteses, but if you use parenteses each invocation must have only 1 parameter #
 let res = let one = 1 in v(one) # extend enviroment with 'one' only for this evaluation and the apply 'one' to 'v' #
+
+let byValueWithSteps = fun x.(fun y.(fun z.(if x then y else z))) (true) 1 (fun x.(x x) (fun x.(x x))) | by value with steps # infinite application error #
+let byNameWithSteps = fun x.(fun y.(fun z.(if x then y else z))) (true) 1 (fun x.(x x) (fun x.(x x))) | by name with steps # This will print: **val - => 1** #
 ```
 
 # Factorial in Lambda calculus

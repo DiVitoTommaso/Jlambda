@@ -18,6 +18,10 @@ Minimal functional programming language like lambda calculus written in java wit
 14) Functions declarations and let in extends the enviroment using maps and redirections for searching for a variable (Evaluation will slow down increasing the number of inner scopes)
 15) Toy language not for real usage
 
+# Release
+- Download Java 8+ (Latest suggested): https://www.java.com/download/ie_manual.jsp
+- Download the release executable file: https://github.com/DiVitoTommaso/Jlambda/releases/tag/Jlambda
+
 # How To Run
 1) *Write in your console ```java -jar path/to/Jlambda.jar ``` replacing "path/to/Jlambda.jar" with the path of the downloaded release file*
 2) You can pass a file as argument when you run the Jlambda class as main class and this will evaluate the code of the file and will open a console where you can see errors, well done evaluations of the file and possibility to evaluate manual code at runtime (no reset possible)
@@ -45,10 +49,6 @@ If you want to use the interpreter as a library:
 
 - ANTLR4 for java: https://www.antlr.org/download.html (for jlambda lexer and parser)
 - Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
-
-# Release
-- Download Java 8+ (Latest suggested): https://www.java.com/download/ie_manual.jsp
-- Download the release executable file: 
 
 # Expression example
 ```

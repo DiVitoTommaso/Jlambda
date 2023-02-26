@@ -3,6 +3,7 @@ package com.jlambda.types;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JavaFunction extends Expression {
@@ -38,6 +39,9 @@ public class JavaFunction extends Expression {
     }
 
     private static Object lambdaValueOf(Expression e) {
+        if (e instanceof ExpressionLazy tmp)
+            return tmp;
+
         if (e instanceof JLVoid)
             return null;
 
@@ -72,7 +76,12 @@ public class JavaFunction extends Expression {
 
         if (neww.args.size() == neww.method.getParameterCount()) {
             try {
-                return jValueOf(neww.method.invoke(null, neww.args.toArray()));
+                return jValueOf(neww.method.invoke(null, Arrays.stream(neww.args.toArray()).map(el -> {
+                    if (el instanceof ExpressionLazy tmp)
+                        return tmp.eval();
+                    else
+                        return el;
+                })));
             } catch (Exception ex) {
                 throw new Error("NativeError: method invocation raised " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
             }

@@ -2,7 +2,7 @@ grammar Jlambda;
 
 stmt: ((let | expr) (';' | EOF))*;
 
-expr: subexpr+;
+expr: subexpr+ ('|' ('by' ('value'|'name'))? ('with' 'steps')?)?;
 
 subexpr:
     let 'in' expr
@@ -23,7 +23,7 @@ let: 'let' VARIABLE '=' (expr | 'free');
 load: 'load' VARIABLE ('.' VARIABLE)* '(' VARIABLE? (',' VARIABLE)* ')' ':' VARIABLE;
 
 STRING: '"' .*? '"' | '\'' .*? '\'';
-FLOAT: [0-9]+ '.' [0-9]*;
+FLOAT: '-' [0-9]+ '.' [0-9]*;
 INT: '-'? [0-9]+;
 BOOL: 'true'| 'false';
 

@@ -1,7 +1,7 @@
 package com.jlambda.core;
 
 import com.jlambda.types.*;
-import com.jlambda.util.ExtensionEnvironment;
+import com.jlambda.util.ExtensorsEnv;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -37,26 +37,61 @@ public class JlambdaInterpreter {
         return "unknown";
     }
 
-    public Expression expr(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
+    private boolean steps = false;
+    private boolean byName = false;
+
+    // Avoid duplicate print due to expression between parentheses
+    private String last = "";
+
+    public synchronized Expression expr(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
         // apply => first function, second and other can be functions or values
-        Expression res = subExpr(ctx.subexpr(0), env);
+        Expression res;
+        if (!byName)
+            res = subExpr(ctx.subexpr(0), env);
+        else
+            res = new ExpressionLazy(this, ctx.subexpr(0), env);
+
+        String v1 = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env) +
+                "\033[0m To => \033[0;32m" + res.toString() + "\033[0m";
+        if (steps && !last.equals(v1))
+            System.out.println(last = v1);
 
         for (int i = 1; i < ctx.subexpr().size(); i++) {
-            Expression tmp = subExpr(ctx.subexpr(i), env);
+            Expression tmp;
+            if (!byName)
+                tmp = subExpr(ctx.subexpr(i), env);
+            else
+                tmp = new ExpressionLazy(this, ctx.subexpr(i), env);
+
+            String v2 = "\033[0mEval Arg => \033[0;33m" + Expression.subExprToString(ctx.subexpr(i), env) +
+                    "\033[0m To => \033[0;32m" + tmp.toString() + "\033[0m";
+            if (!byName && steps && !last.equals(v2))
+                System.out.println(last = v2);
+
+            while (res instanceof ExpressionLazy lazy)
+                res = lazy.eval();
+
+            Expression old = res;
 
             if (res instanceof JavaFunction jFun)
                 res = jFun.apply(tmp);
             else if (res instanceof JLFun fun)
                 res = fun.apply(tmp);
             else if (res instanceof JLFreeVar var) {
-                res = new JLFreeVar(var.name + "(" + tmp.toString() + ")");
+                res = new JLFreeVar(var.name + "(" + tmp + ")");
             } else
                 throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
+
+            String v3 = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" +
+                    old + "\033[0m Obtaining => \033[0;32m" + res + "\033[0m";
+            if (steps && !last.equals(v3))
+                System.out.println(last = v3);
+
         }
         return res;
     }
 
-    public Expression subExpr(JlambdaParser.SubexprContext ctx, Map<String, Expression> env) {
+    public synchronized Expression subExpr(JlambdaParser.SubexprContext ctx, Map<String, Expression> env) {
         // values
         if (ctx.expr() == null) {
             // int
@@ -89,7 +124,7 @@ public class JlambdaInterpreter {
 
         // local declaration
         if (ctx.let() != null) {
-            HashMap<String, Expression> newEnv = new ExtensionEnvironment(env);
+            HashMap<String, Expression> newEnv = new ExtensorsEnv(env);
             let(ctx.let(), newEnv);
             return expr(ctx.expr(), newEnv);
         }
@@ -101,8 +136,12 @@ public class JlambdaInterpreter {
         // if statement
         if (ctx.select() != null) {
             Expression result = expr(ctx.select().expr(0), env);
+
+            while (result instanceof ExpressionLazy lazy)
+                result = lazy.eval();
+
             if (!(result instanceof JLBool tmp))
-                throw new Error("TypeError: non boolean if guard");
+                throw new Error("TypeError: Non boolean if guard");
 
             if (tmp.v)
                 return expr(ctx.select().expr(1), env);
@@ -120,7 +159,7 @@ public class JlambdaInterpreter {
         throw new Error("FatalError: Expression not recognized");
     }
 
-    public JavaFunction load(JlambdaParser.LoadContext load) {
+    public synchronized JavaFunction load(JlambdaParser.LoadContext load) {
         StringBuilder tmp = new StringBuilder();
         ArrayList<String> params = new ArrayList<>();
         StringBuilder ret = new StringBuilder();
@@ -195,9 +234,11 @@ public class JlambdaInterpreter {
         throw new Error("NativeError: No method not found with the given signature.");
     }
 
-    public String let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
+    public synchronized String let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
         if (ctx.expr() != null) {
             Expression res = expr(ctx.expr(), env);
+            while (res instanceof ExpressionLazy tmp)
+                res = tmp.eval();
             env.put(ctx.VARIABLE().getText(), res);
             return ctx.VARIABLE().getText() + " => " + res.toString();
         } else {
@@ -206,12 +247,12 @@ public class JlambdaInterpreter {
         }
     }
 
-    public void fvExpr(JlambdaParser.ExprContext ctx, Set<String> vars) {
+    public synchronized void fvExpr(JlambdaParser.ExprContext ctx, Set<String> vars) {
         for (JlambdaParser.SubexprContext c : ctx.subexpr())
             fvSubExpr(c, vars);
     }
 
-    public void fvSubExpr(JlambdaParser.SubexprContext ctx, Set<String> vars) {
+    public synchronized void fvSubExpr(JlambdaParser.SubexprContext ctx, Set<String> vars) {
         if (ctx.select() != null) {
             for (JlambdaParser.ExprContext c : ctx.select().expr())
                 fvExpr(c, vars);
@@ -238,28 +279,57 @@ public class JlambdaInterpreter {
         }
     }
 
-    public void fvLet(JlambdaParser.LetContext ctx, Set<String> vars) {
+    public synchronized void fvLet(JlambdaParser.LetContext ctx, Set<String> vars) {
         if (ctx.expr() != null)
             fvExpr(ctx.expr(), vars);
         vars.add(ctx.VARIABLE().getText());
     }
 
-    private String stmt(JlambdaParser.StmtContext ctx) {
+    private synchronized String stmt(JlambdaParser.StmtContext ctx) {
+        JlambdaParser.ExprContext temp = null;
         try {
             StringBuilder result = new StringBuilder();
+
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp) {
+                    temp = tmp.expr();
                     fvLet(tmp, vars);
+
+                    for (ParseTree e : tmp.expr().children) {
+                        if (e.getText().equals("steps"))
+                            steps = true;
+
+                        if (e.getText().equals("name"))
+                            byName = true;
+                    }
+
                     result.append("val ").append(let(tmp, env)).append("\n");
                 }
+
                 if (tree instanceof JlambdaParser.ExprContext tmp) {
+                    temp = tmp;
                     fvExpr(tmp, vars);
-                    result.append("val - => ").append(expr(tmp, env)).append("\n");
+
+                    for (ParseTree e : tmp.children) {
+                        if (e.getText().equals("steps"))
+                            steps = true;
+
+                        if (e.getText().equals("name"))
+                            byName = true;
+                    }
+
+                    Expression res = expr(tmp, env);
+                    while (res instanceof ExpressionLazy lazy)
+                        res = lazy.eval();
+                    result.append("val - => ").append(res).append("\n");
                 }
             }
             return result.toString();
         } catch (StackOverflowError e) {
-            throw new Error("LoopError: infinite function application in expression: " + ctx.getText());
+            throw new Error("LoopError: infinite function application in expression: " + Expression.exprToString(temp, env));
+        } finally {
+            byName = false;
+            steps = false;
         }
     }
 

@@ -20,7 +20,7 @@ Minimal functional programming language like lambda calculus written in java wit
 
 # How To
 
-*Basic Usage: write in your console ```java -jar path/to/jlambda.jar ``` replacing "path/to/jlambda.jar" with the path of the downloaded release file*
+*Basic Usage: write in your console ```java -jar path/to/Jlambda.jar ``` replacing "path/to/Jlambda.jar" with the path of the downloaded release file*
 
 If you want to run the code and edit:
 1) You can run the project using the Jlambda class in the [main.java.com.jlambda.builtin] directory as a normal maven project.
@@ -50,8 +50,7 @@ If you want to use the interpreter as a library:
 - Apache Maven: https://maven.apache.org/download.cgi (useful for building project, but not necessary to run it)
 
 # Release
-The release will let you run a console line interpreter with possibility to load native java functions. You can pass a file to evaluate containing Jlambda code as argument to the executable (jar) to build an initial environment
-
+The release will let you run a console line interpreter with possibility to load native java functions. You can pass a file to evaluate containing Jlambda code as argument to the executable (jar) to build an initial environment. To start an empty interpreter run: ```java -jar path/to/Jlambda.jar ```
 # Expression example
 ```
 let f = free # free var #

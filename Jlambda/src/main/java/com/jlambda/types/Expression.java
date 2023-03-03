@@ -8,8 +8,11 @@ import java.util.Map;
 public abstract class Expression {
     public static String exprToString(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
         var tmp = new StringBuilder();
-        for (JlambdaParser.SubexprContext e : ctx.subexpr())
-            tmp.append("(").append(subExprToString(e, env)).append(")");
+        for (JlambdaParser.SubexprContext e : ctx.subexpr()) {
+            if (!tmp.isEmpty())
+                tmp.append(" ");
+            tmp.append(subExprToString(e, env));
+        }
         return tmp.toString();
     }
 
@@ -22,7 +25,7 @@ public abstract class Expression {
                     .append(ctx.fun().VARIABLE().getText())
                     .append(" -> (")
                     .append(exprToString(ctx.fun().expr(), env))
-                    .append(") ")
+                    .append(")")
                     .toString();
         }
 
@@ -45,7 +48,7 @@ public abstract class Expression {
                     .toString();
 
         if (ctx.expr() != null)
-            return tmp.append("(").append(exprToString(ctx.expr(), env)).append(")").toString();
+            return tmp.append(exprToString(ctx.expr(), env)).toString();
 
         if (ctx.children.get(0).getText().equals("("))
             return tmp.append("()").toString();

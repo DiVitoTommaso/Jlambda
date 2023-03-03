@@ -10,6 +10,6 @@ public class JLFreeVar extends Expression {
 
     @Override
     public String toString() {
-        return "free " + name;
+        return "free '" + name + "'";
     }
 }

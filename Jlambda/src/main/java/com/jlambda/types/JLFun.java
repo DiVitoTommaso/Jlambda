@@ -30,6 +30,6 @@ public class JLFun extends Expression {
 
     @Override
     public String toString() {
-        return String.format("fun %s -> %s", param, exprToString(body, funEnv));
+        return String.format("fun %s -> (%s)", param, exprToString(body, funEnv));
     }
 }

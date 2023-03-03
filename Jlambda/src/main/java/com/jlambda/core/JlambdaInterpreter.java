@@ -124,8 +124,7 @@ public class JlambdaInterpreter {
         // local declaration
         if (ctx.let() != null) {
             HashMap<String, Expression> newEnv = new ExtensorsEnv(env);
-            let(ctx.let(), newEnv);
-            return expr(ctx.expr(), newEnv);
+            return let(ctx.let(), newEnv);
         }
 
         // function declaration
@@ -233,16 +232,17 @@ public class JlambdaInterpreter {
         throw new Error("NativeError: No method not found with the given signature.");
     }
 
-    public synchronized String let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
+    public synchronized Expression let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
         if (ctx.expr() != null) {
             Expression res = expr(ctx.expr(), env);
             while (res instanceof ExpressionLazy tmp)
                 res = tmp.eval();
             env.put(ctx.VARIABLE().getText(), res);
-            return ctx.VARIABLE().getText() + " => " + res.toString();
+            return res;
         } else {
-            env.put(ctx.VARIABLE().getText(), new JLFreeVar(ctx.VARIABLE().getText()));
-            return ctx.VARIABLE().getText() + " => free";
+            Expression res = new JLFreeVar(ctx.VARIABLE().getText());
+            env.put(ctx.VARIABLE().getText(), res);
+            return res;
         }
     }
 
@@ -291,18 +291,24 @@ public class JlambdaInterpreter {
 
             for (ParseTree tree : ctx.children) {
                 if (tree instanceof JlambdaParser.LetContext tmp) {
-                    temp = tmp.expr();
-                    fvLet(tmp, vars);
+                    if (tmp.expr() != null) {
+                        temp = tmp.expr();
 
-                    for (ParseTree e : tmp.expr().children) {
-                        if (e.getText().equals("steps"))
-                            steps = true;
+                        for (ParseTree e : tmp.expr().children) {
+                            if (e.getText().equals("steps"))
+                                steps = true;
 
-                        if (e.getText().equals("name"))
-                            byName = true;
+                            if (e.getText().equals("name"))
+                                byName = true;
+                        }
                     }
 
-                    result.append("val ").append(let(tmp, env)).append("\n");
+                    fvLet(tmp, vars);
+                    result.append("val ")
+                            .append(tmp.VARIABLE().getText())
+                            .append(" => ")
+                            .append(let(tmp, env))
+                            .append("\n");
                 }
 
                 if (tree instanceof JlambdaParser.ExprContext tmp) {

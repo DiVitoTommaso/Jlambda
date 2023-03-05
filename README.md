@@ -19,7 +19,7 @@ Minimal functional programming language like lambda calculus written in java wit
 15) Toy language not for real usage
 
 # Release
-- Download Java 8+ (Latest suggested): https://www.java.com/download/ie_manual.jsp
+- Download Java 19+ (Latest suggested): https://www.oracle.com/it/java/technologies/downloads/#java19
 - Download the release executable file: https://github.com/DiVitoTommaso/Jlambda/releases/tag/Jlambda
 
 # How To Run

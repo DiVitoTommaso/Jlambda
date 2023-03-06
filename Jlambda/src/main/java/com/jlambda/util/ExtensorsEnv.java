@@ -27,4 +27,9 @@ public class ExtensorsEnv extends HashMap<String, Expression> {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " => " + parent.toString();
+    }
 }

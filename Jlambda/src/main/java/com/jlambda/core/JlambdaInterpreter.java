@@ -121,6 +121,12 @@ public class JlambdaInterpreter {
             return load(ctx.load());
         }
 
+        if (ctx.let() != null && ctx.expr() != null) {
+            HashMap<String, Expression> newEnv = new ExtensorsEnv(env);
+            let(ctx.let(), newEnv);
+            return expr(ctx.expr(), newEnv);
+        }
+
         // local declaration
         if (ctx.let() != null) {
             HashMap<String, Expression> newEnv = new ExtensorsEnv(env);
@@ -326,7 +332,10 @@ public class JlambdaInterpreter {
                     Expression res = expr(tmp, env);
                     while (res instanceof ExpressionLazy lazy)
                         res = lazy.eval();
-                    result.append("val - => ").append(res).append("\n");
+
+                    result.append("val - => ")
+                            .append(res instanceof JLFun fun ? fun.toString(env) : res.toString())
+                            .append("\n");
                 }
             }
             return result.toString();

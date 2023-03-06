@@ -28,8 +28,14 @@ public class JLFun extends Expression {
         return instance.expr(body, newEnv);
     }
 
+    public String toString(Map<String, Expression> env) {
+        HashMap<String, Expression> newEnv = new ExtensorsEnv(env);
+        newEnv.put(param, null);
+        return String.format("fun %s -> (%s)", param, exprToString(body, newEnv));
+    }
+
     @Override
     public String toString() {
-        return String.format("fun %s -> (%s)", param, exprToString(body, funEnv));
+        return "fun (%s) -> (%s)".formatted(param, exprToString(body, new HashMap<>()));
     }
 }

@@ -36,6 +36,8 @@ public class JLFun extends Expression {
 
     @Override
     public String toString() {
-        return "fun (%s) -> (%s)".formatted(param, exprToString(body, new HashMap<>()));
+        HashMap<String, Expression> newEnv = new ExtensorsEnv(funEnv);
+        newEnv.put(param, null);
+        return "fun %s -> (%s)".formatted(param, exprToString(body, newEnv));
     }
 }

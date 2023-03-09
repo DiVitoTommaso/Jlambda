@@ -37,26 +37,31 @@ public class JlambdaInterpreter {
         return "unknown";
     }
 
+    private boolean skip = false;
     private boolean steps = false;
     private boolean byName = false;
 
-    // Avoid duplicate print due to expression between parentheses
     private String last = "";
 
     public synchronized Expression expr(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
         // apply => first function, second and other can be functions or values
+
+        String v;
+        v = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env);
+        if (steps && !last.equals(v) && !skip)
+            System.out.println(last = v);
+
         Expression res;
         if (!byName)
             res = subExpr(ctx.subexpr(0), env);
         else
             res = new ExpressionLazy(this, ctx.subexpr(0), env);
 
-        if (res instanceof ExpressionLazy || res instanceof JavaFunction || res instanceof JLFun) {
-            String v1 = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env) +
-                    "\033[0m To => \033[0;32m" + res + "\033[0m =>";
-            if (steps && !last.equals(v1))
-                System.out.println(last = v1);
-        }
+        v = "\033[0mObtaining => \033[0;32m" + res + "\033[0m =>";
+        if (steps && !last.equals(v) && !skip && (res instanceof ExpressionLazy || res instanceof JavaFunction || res instanceof JLFun))
+            System.out.println(last = v);
+
+        skip = false;
 
         for (int i = 1; i < ctx.subexpr().size(); i++) {
             Expression tmp;
@@ -70,22 +75,24 @@ public class JlambdaInterpreter {
 
             Expression old = res;
 
-            String v3 = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" + res + "\033[0m =>";
-            if (steps && !last.equals(v3))
-                System.out.println(last = v3);
+            v = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" + res + "\033[0m =>";
+            if (steps && !last.equals(v))
+                System.out.println(last = v);
 
-            if (res instanceof JavaFunction jFun)
+            if (res instanceof JavaFunction jFun) {
+                skip = true;
                 res = jFun.apply(tmp);
-            else if (res instanceof JLFun fun)
+            } else if (res instanceof JLFun fun) {
+                skip = true;
                 res = fun.apply(tmp);
-            else if (res instanceof JLFreeVar var) {
+            } else if (res instanceof JLFreeVar var) {
                 res = new JLFreeVar(var.name + "(" + tmp + ")");
             } else
                 throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
 
-            if (steps && !last.equals(v3))
-                System.out.println("\033[0mObtaining => \033[0;32m" + res + "\033[0m => From => \033[0;36m" + old + "\033[0m => ");
-
+            v = "\033[0mObtaining => \033[0;32m" + res + "\033[0m => ";
+            if (steps && !last.equals(v))
+                System.out.println(last = v);
         }
         return res;
     }

@@ -33,10 +33,12 @@ public abstract class Expression {
         }
 
         if (ctx.fun() != null) {
+            Map<String, Expression> newEnv = new ExtensorsEnv(env);
+            newEnv.put(ctx.fun().VARIABLE().getText(), null);
             return tmp.append("fun ")
                     .append(ctx.fun().VARIABLE().getText())
                     .append(" -> (")
-                    .append(exprToString(ctx.fun().expr(), env))
+                    .append(exprToString(ctx.fun().expr(), newEnv))
                     .append(")")
                     .toString();
         }

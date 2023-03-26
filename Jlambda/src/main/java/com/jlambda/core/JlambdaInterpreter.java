@@ -320,7 +320,7 @@ public class JlambdaInterpreter {
                     result.append("val ")
                             .append(tmp.VARIABLE().getText())
                             .append(" => ")
-                            .append(let(tmp, env))
+                            .append(let(tmp, env = new HashMap<>(env)))
                             .append("\n");
                 }
 
@@ -341,7 +341,7 @@ public class JlambdaInterpreter {
                         res = lazy.eval();
 
                     result.append("val - => ")
-                            .append(res instanceof JLFun fun ? fun.toString(env) : res.toString())
+                            .append(res instanceof JLFun fun ? fun.toString() : res.toString())
                             .append("\n");
                 }
             }
@@ -351,7 +351,6 @@ public class JlambdaInterpreter {
         } finally {
             byName = false;
             steps = false;
-            env = (HashMap<String, Expression>) env.clone();
         }
     }
 

@@ -12,8 +12,8 @@ import java.util.*;
 
 public class JlambdaInterpreter {
 
-    private final Map<String, Expression> env = new HashMap<>();
-    private final Set<String> vars = new HashSet<>();
+    private HashMap<String, Expression> env = new HashMap<>();
+    private final HashSet<String> vars = new HashSet<>();
     private boolean load = true;
 
     private static String typeof(Expression e) {
@@ -351,6 +351,7 @@ public class JlambdaInterpreter {
         } finally {
             byName = false;
             steps = false;
+            env = (HashMap<String, Expression>) env.clone();
         }
     }
 

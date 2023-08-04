@@ -66,9 +66,9 @@ let byNameWithSteps = fun x.(fun y.(fun z.(if x then y else z))) (true) 1 (fun x
 
 # Factorial in Lambda calculus
 ```
-let mul = native com.jlambda.builtin.Builtin.mul(int,int):int;
-let sub = native com.jlambda.builtin.Builtin.sub(int,int):int;
-let eq = native com.jlambda.builtin.Builtin.equals(int, int):boolean;
+let mul = native com.jlambda.Builtin.mul(int,int):int;
+let sub = native com.jlambda.Builtin.sub(int,int):int;
+let eq = native com.jlambda.Builtin.equals(int, int):boolean;
 
 let Y = fun f.(fun x.(x x)(fun x.(f(fun y.(x(x)(y)))))); # Y combinator to emulate recursion #
 let fact = fun f.(fun x.(if eq(x)(1) then 1 else mul(x)(f(sub(x)(1))))); # Factorial function definition without recursion support #

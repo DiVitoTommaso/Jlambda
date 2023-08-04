@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class ExpressionLazy extends Expression {
 
-    private final JlambdaInterpreter instance;
-    public final JlambdaParser.SubexprContext ctx;
-    public final Map<String, Expression> env;
+    private JlambdaInterpreter instance;
+    public JlambdaParser.SubexprContext ctx;
+    public Map<String, Expression> env;
 
 
     public ExpressionLazy(JlambdaInterpreter instance, JlambdaParser.SubexprContext ctx, Map<String, Expression> env) {

@@ -1,7 +1,7 @@
 package com.jlambda.types;
 
 public class JLString extends Expression {
-    final String v;
+    public String v;
 
     public JLString(String v) {
         this.v = v;

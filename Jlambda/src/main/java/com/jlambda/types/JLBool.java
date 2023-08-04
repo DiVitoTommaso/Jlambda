@@ -1,7 +1,8 @@
 package com.jlambda.types;
 
 public class JLBool extends Expression {
-    public final boolean v;
+
+    public boolean v;
     public JLBool(boolean v) {
         this.v = v;
     }

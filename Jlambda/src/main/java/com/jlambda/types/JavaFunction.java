@@ -5,11 +5,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class JavaFunction extends Expression {
-    public final Method method;
-    public final List<Object> args = new ArrayList<>();
+    public Method method;
+    public List<Object> args = new ArrayList<>();
 
     public JavaFunction(Method m) {
         if (m == null || !Modifier.isStatic(m.getModifiers()))
@@ -61,7 +60,7 @@ public class JavaFunction extends Expression {
             return tmp.v;
         }
 
-        if (e instanceof JLFreeVar tmp) {
+        if (e instanceof JLFreeExpr tmp) {
             return new Object() {
                 public final String free = tmp.name;
             };

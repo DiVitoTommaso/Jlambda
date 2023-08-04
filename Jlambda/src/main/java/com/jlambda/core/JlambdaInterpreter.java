@@ -14,7 +14,7 @@ public class JlambdaInterpreter {
 
     private HashMap<String, Expression> env = new HashMap<>();
     private final HashSet<String> vars = new HashSet<>();
-    private boolean load = true;
+    private boolean allowNative = true;
 
     private static String typeof(Expression e) {
         if (e instanceof JLVoid)
@@ -31,37 +31,26 @@ public class JlambdaInterpreter {
             return "bool";
         if (e instanceof JLFloat)
             return "float";
-        if (e instanceof JLFreeVar)
+        if (e instanceof JLFreeExpr)
             return "free var";
 
         return "unknown";
     }
 
-    private boolean skip = false;
+    private int tabs = -1;
     private boolean steps = false;
     private boolean byName = false;
 
     private String last = "";
 
     public synchronized Expression expr(JlambdaParser.ExprContext ctx, Map<String, Expression> env) {
-        // apply => first function, second and other can be functions or values
-
-        String v;
-        v = "\033[0mEval Expr => \033[0;33m" + Expression.subExprToString(ctx.subexpr(0), env);
-        if (steps && !last.equals(v) && !skip)
-            System.out.println(last = v);
+        tabs++;
 
         Expression res;
         if (!byName)
             res = subExpr(ctx.subexpr(0), env);
         else
             res = new ExpressionLazy(this, ctx.subexpr(0), env);
-
-        v = "\033[0mObtaining => \033[0;32m" + res + "\033[0m =>";
-        if (steps && !last.equals(v) && !skip && (res instanceof ExpressionLazy || res instanceof JavaFunction || res instanceof JLFun))
-            System.out.println(last = v);
-
-        skip = false;
 
         for (int i = 1; i < ctx.subexpr().size(); i++) {
             Expression tmp;
@@ -73,27 +62,33 @@ public class JlambdaInterpreter {
             while (res instanceof ExpressionLazy lazy)
                 res = lazy.eval();
 
-            Expression old = res;
-
-            v = "\033[0mApply Arg => \033[0;33m" + tmp + "\033[0m To => \033[0;36m" + res + "\033[0m =>";
-            if (steps && !last.equals(v))
+            String v = "\033[0mApply Arg => \033[0;33m" + Expression.format(tmp) +
+                        "\033[0m To => \033[0;36m" + Expression.format(res) + "\033[0m =>";
+            if (steps) {
+                for (int j = 0; j < tabs; j++)
+                    System.out.print("\t");
                 System.out.println(last = v);
+            }
 
             if (res instanceof JavaFunction jFun) {
-                skip = true;
                 res = jFun.apply(tmp);
             } else if (res instanceof JLFun fun) {
-                skip = true;
                 res = fun.apply(tmp);
-            } else if (res instanceof JLFreeVar var) {
-                res = new JLFreeVar(var.name + "(" + tmp + ")");
-            } else
+            } else if (res instanceof JLFreeExpr var) {
+                res = new JLFreeExpr(var, tmp);
+            } else {
+                tabs--;
                 throw new Error("TypeError: " + "Cannot apply " + typeof(res) + " to " + typeof(tmp));
-
-            v = "\033[0mObtaining => \033[0;32m" + res + "\033[0m => ";
-            if (steps && !last.equals(v))
+            }
+            v = "\033[0mObtaining => \033[0;32m" + Expression.format(res) + "\033[0m => ";
+            if (steps) {
+                for (int j = 0; j < tabs; j++)
+                    System.out.print("\t");
                 System.out.println(last = v);
+            }
         }
+
+        tabs--;
         return res;
     }
 
@@ -117,13 +112,16 @@ public class JlambdaInterpreter {
                 return new JLString(ctx.STRING().getText().substring(1, ctx.STRING().getText().length() - 1));
 
             // var
-            if (ctx.VARIABLE() != null)
+            if (ctx.VARIABLE() != null) {
+                if (env.get(ctx.VARIABLE().getText()) == null)
+                    env.put(ctx.VARIABLE().getText(), new JLFreeExpr(ctx.VARIABLE().getText()));
                 return env.get(ctx.VARIABLE().getText());
+            }
         }
 
         // load declaration
         if (ctx.load() != null) {
-            if (!load)
+            if (!allowNative)
                 throw new Error("LoaderError: The native loader is disabled for this interpreter");
             return load(ctx.load());
         }
@@ -176,7 +174,7 @@ public class JlambdaInterpreter {
         StringBuilder ret = new StringBuilder();
 
         for (ParseTree v : load.children) {
-            if (v.getText().equals("load"))
+            if (v.getText().equals("native"))
                 continue;
 
             if (v.getText().equals(".")) {
@@ -242,59 +240,16 @@ public class JlambdaInterpreter {
         } catch (Exception ignored) {
         }
 
-        throw new Error("NativeError: No method not found with the given signature.");
+        throw new Error("NativeError: No method found with the given signature.");
     }
 
     public synchronized Expression let(JlambdaParser.LetContext ctx, Map<String, Expression> env) {
-        if (ctx.expr() != null) {
-            Expression res = expr(ctx.expr(), env);
-            while (res instanceof ExpressionLazy tmp)
-                res = tmp.eval();
-            env.put(ctx.VARIABLE().getText(), res);
-            return res;
-        } else {
-            Expression res = new JLFreeVar(ctx.VARIABLE().getText());
-            env.put(ctx.VARIABLE().getText(), res);
-            return res;
-        }
-    }
+        Expression res = expr(ctx.expr(), env);
+        while (res instanceof ExpressionLazy tmp)
+            res = tmp.eval();
+        env.put(ctx.VARIABLE().getText(), res);
+        return res;
 
-    public synchronized void fvExpr(JlambdaParser.ExprContext ctx, Set<String> vars) {
-        for (JlambdaParser.SubexprContext c : ctx.subexpr())
-            fvSubExpr(c, vars);
-    }
-
-    public synchronized void fvSubExpr(JlambdaParser.SubexprContext ctx, Set<String> vars) {
-        if (ctx.select() != null) {
-            for (JlambdaParser.ExprContext c : ctx.select().expr())
-                fvExpr(c, vars);
-            return;
-        }
-
-        if (ctx.fun() != null) {
-            HashSet<String> newEnv = new HashSet<>(vars);
-            newEnv.add(ctx.fun().VARIABLE().getText());
-            fvExpr(ctx.fun().expr(), newEnv);
-            return;
-        }
-
-        if (ctx.let() != null) {
-            HashSet<String> newEnv = new HashSet<>(vars);
-            fvLet(ctx.let(), newEnv);
-            fvExpr(ctx.expr(), newEnv);
-            return;
-        }
-
-        if (ctx.VARIABLE() != null) {
-            if (!vars.contains(ctx.VARIABLE().getText()))
-                throw new Error("NameError: Unbound name: " + ctx.VARIABLE().getText());
-        }
-    }
-
-    public synchronized void fvLet(JlambdaParser.LetContext ctx, Set<String> vars) {
-        if (ctx.expr() != null)
-            fvExpr(ctx.expr(), vars);
-        vars.add(ctx.VARIABLE().getText());
     }
 
     private synchronized String stmt(JlambdaParser.StmtContext ctx) {
@@ -316,7 +271,6 @@ public class JlambdaInterpreter {
                         }
                     }
 
-                    fvLet(tmp, vars);
                     result.append("val ")
                             .append(tmp.VARIABLE().getText())
                             .append(" => ")
@@ -326,7 +280,6 @@ public class JlambdaInterpreter {
 
                 if (tree instanceof JlambdaParser.ExprContext tmp) {
                     temp = tmp;
-                    fvExpr(tmp, vars);
 
                     for (ParseTree e : tmp.children) {
                         if (e.getText().equals("steps"))
@@ -340,14 +293,13 @@ public class JlambdaInterpreter {
                     while (res instanceof ExpressionLazy lazy)
                         res = lazy.eval();
 
-                    result.append("val - => ")
-                            .append(res instanceof JLFun fun ? fun.toString() : res.toString())
-                            .append("\n");
+                    /* */
+                    result.append("val - => ").append(Expression.format(res)).append("\n");
                 }
             }
             return result.toString();
         } catch (StackOverflowError e) {
-            throw new Error("LoopError: infinite function application in expression: " + Expression.exprToString(temp, env));
+            throw new Error("ApplicationError: infinite application in expression: " + Expression.exprToString(temp, env));
         } finally {
             byName = false;
             steps = false;
@@ -430,7 +382,8 @@ public class JlambdaInterpreter {
         return "val " + var + " => " + String.format("[Native Function]{%s}", m.getParameterCount());
     }
 
-    public synchronized void allowLoad(boolean allow) {
-        load = allow;
+    public synchronized void allowNativeConstruct(boolean allow) {
+        allowNative = allow;
     }
+
 }

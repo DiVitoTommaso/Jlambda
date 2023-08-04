@@ -17,28 +17,17 @@ subexpr:
     | '(' expr? ')'
     ;
 
-fun: ('λ'|'fun') VARIABLE ('.'|'->') '(' expr ')';
+fun: ('\u03BB'|'fun') VARIABLE ('.'|'->') '(' expr ')';
 select: 'if' expr 'then' expr 'else' expr;
-let: 'let' VARIABLE '=' (expr | 'free');
-load: 'load' VARIABLE ('.' VARIABLE)* '(' VARIABLE? (',' VARIABLE)* ')' ':' VARIABLE;
+let: 'let' VARIABLE '=' expr;
+load: 'native' VARIABLE ('.' VARIABLE)* '(' VARIABLE? (',' VARIABLE)* ')' ':' VARIABLE;
 
-STRING: '"' .*? '"' | '\'' .*? '\'';
-FLOAT: '-' [0-9]+ '.' [0-9]*;
+STRING: '"' .*? '"';
+FLOAT: '-'? [0-9]+ '.' [0-9]*;
 INT: '-'? [0-9]+;
 BOOL: 'true'| 'false';
 
-fragment IdentifierPart
-    : IdentifierStart
-    | [\p{Mn}]
-    | [\p{Nd}]
-    | [\p{Pc}]
-    ;
-fragment IdentifierStart
-    : [\p{L}]
-    | [$_]
-    ;
+VARIABLE: [a-zA-Z]+;
 
-VARIABLE: IdentifierStart IdentifierPart*;
-
-COMMENT: '#' .*? '#' -> skip;
+COMMENT: '#' .*? ('\r\n' | '\n') -> skip;
 WS: [ \t\r\n] -> skip;

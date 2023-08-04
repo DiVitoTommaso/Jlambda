@@ -1,6 +1,6 @@
 package com.jlambda.types;
 public class JLInt extends Expression {
-    final int v;
+    public int v;
 
     public JLInt(int v) {
         this.v = v;

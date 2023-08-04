@@ -1,7 +1,8 @@
 package com.jlambda.types;
 
 public class JLFloat extends Expression {
-    public final double v;
+
+    public double v;
 
     public JLFloat(double v) {
         this.v = v;
